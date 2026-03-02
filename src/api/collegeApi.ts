@@ -5,15 +5,23 @@ export interface College {
   collegeCode: string;
   collegeName: string;
   collegeType: string;
-  university: string;
+  universityName: string;
+  collegeAddress: string;
 }
 
 export const collegeApi = {
   getAll: (params?: { page?: number; size?: number; search?: string }) =>
-    axiosInstance.get<{ content: College[]; totalPages: number; totalElements: number }>(
+    axiosInstance.get<{
+      content: College[];
+      totalPages: number; totalElements: number
+    }>(
       "/api/public/colleges",
       { params }
     ),
+
+  getAllColleges: () =>
+    axiosInstance.get<College[]>("/api/admin/colleges"),
+
 
   create: (data: Partial<College>) =>
     axiosInstance.post("/api/admin/colleges", data),

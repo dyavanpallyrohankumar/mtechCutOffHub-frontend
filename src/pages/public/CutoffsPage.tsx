@@ -6,12 +6,12 @@ import LoadingSkeleton from "@/components/LoadingSkeleton";
 import EmptyState from "@/components/EmptyState";
 
 const demoCutoffs: CutoffData[] = [
-  { id: 1, exam: "GATE", year: 2025, phase: "Phase I", gender: "General", category: "GM", openingRank: 150, closingRank: 890, openingPercentile: 98.5, closingPercentile: 92.1 },
-  { id: 2, exam: "GATE", year: 2025, phase: "Phase I", gender: "General", category: "SC", openingRank: 1200, closingRank: 3500, openingPercentile: 88.0, closingPercentile: 72.5 },
-  { id: 3, exam: "GATE", year: 2025, phase: "Phase II", gender: "General", category: "GM", openingRank: 900, closingRank: 1500, openingPercentile: 92.0, closingPercentile: 85.0 },
-  { id: 4, exam: "PGCET", year: 2025, phase: "Phase I", gender: "General", category: "GM", openingRank: 50, closingRank: 450, openingPercentile: 99.0, closingPercentile: 94.0 },
-  { id: 5, exam: "PGCET", year: 2025, phase: "Phase I", gender: "General", category: "OBC", openingRank: 500, closingRank: 2000, openingPercentile: 94.0, closingPercentile: 80.0 },
-  { id: 6, exam: "GATE", year: 2024, phase: "Phase I", gender: "General", category: "GM", openingRank: 180, closingRank: 950, openingPercentile: 97.8, closingPercentile: 91.0 },
+  { exam: "GATE", year: 2025, phase: "Phase I", gender: "General", category: "GM", startRank: 150, endRank: 890, startPercentile: 98.5, endPercentile: 92.1 },
+  { exam: "GATE", year: 2025, phase: "Phase I", gender: "General", category: "SC", startRank: 1200, endRank: 3500, startPercentile: 88.0, endPercentile: 72.5 },
+  { exam: "GATE", year: 2025, phase: "Phase II", gender: "General", category: "GM", startRank: 900, endRank: 1500, startPercentile: 92.0, endPercentile: 85.0 },
+  { exam: "PGCET", year: 2025, phase: "Phase I", gender: "General", category: "GM", startRank: 50, endRank: 450, startPercentile: 99.0, endPercentile: 94.0 },
+  { exam: "PGCET", year: 2025, phase: "Phase I", gender: "General", category: "OBC", startRank: 500, endRank: 2000, startPercentile: 94.0, endPercentile: 80.0 },
+  { exam: "GATE", year: 2024, phase: "Phase I", gender: "General", category: "GM", startRank: 180, endRank: 950, startPercentile: 97.8, endPercentile: 91.0 },
 ];
 
 const examOptions = ["All", "GATE", "PGCET"];
@@ -37,8 +37,8 @@ const CutoffsPage = () => {
         if (exam !== "All") params.exam = exam;
         if (phase !== "All") params.phase = phase;
         if (category !== "All") params.category = category;
-        const res = await cutoffApi.getCutoffs(Number(collegeId), Number(branchId), params);
-        setCutoffs(res.data);
+        const res = await cutoffApi.getCutoffs(collegeId, branchId, params);
+        setCutoffs(Array.isArray(res.data) ? res.data : []);
       } catch {
         setCutoffs(demoCutoffs);
       } finally {
@@ -57,11 +57,11 @@ const CutoffsPage = () => {
 
   const sorted = sortKey
     ? [...filtered].sort((a, b) => {
-        const av = a[sortKey];
-        const bv = b[sortKey];
-        if (typeof av === "number" && typeof bv === "number") return sortAsc ? av - bv : bv - av;
-        return 0;
-      })
+      const av = a[sortKey];
+      const bv = b[sortKey];
+      if (typeof av === "number" && typeof bv === "number") return sortAsc ? av - bv : bv - av;
+      return 0;
+    })
     : filtered;
 
   const handleSort = (key: keyof CutoffData) => {
@@ -71,7 +71,7 @@ const CutoffsPage = () => {
 
   const exportCSV = () => {
     const headers = ["Exam", "Year", "Phase", "Gender", "Category", "Opening Rank", "Closing Rank", "Opening %ile", "Closing %ile"];
-    const rows = sorted.map((c) => [c.exam, c.year, c.phase, c.gender, c.category, c.openingRank, c.closingRank, c.openingPercentile, c.closingPercentile].join(","));
+    const rows = sorted.map((c) => [c.exam, c.year, c.phase, c.gender, c.category, c.startRank, c.endRank, c.startPercentile, c.endPercentile].join(","));
     const csv = [headers.join(","), ...rows].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
@@ -153,34 +153,57 @@ const CutoffsPage = () => {
                   <tr className="border-b border-border/50">
                     <SortHeader label="Exam" field="exam" />
                     <SortHeader label="Year" field="year" />
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Phase</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Category</th>
-                    <SortHeader label="Open Rank" field="openingRank" />
-                    <SortHeader label="Close Rank" field="closingRank" />
-                    <SortHeader label="Open %ile" field="openingPercentile" />
-                    <SortHeader label="Close %ile" field="closingPercentile" />
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      Phase
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      Gender
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      Category
+                    </th>
+                    <SortHeader label="Open Rank" field="startRank" />
+                    <SortHeader label="Close Rank" field="endRank" />
+                    <SortHeader label="Open %ile" field="startPercentile" />
+                    <SortHeader label="Close %ile" field="endPercentile" />
                   </tr>
                 </thead>
                 <tbody>
-                  {sorted.map((c) => (
-                    <tr key={c.id} className="border-b border-border/30 hover:bg-muted/30 transition-colors">
-                      <td className="px-4 py-3">
-                        <span className={`px-2 py-0.5 rounded-md text-xs font-medium ${getBadgeClass(c.exam)}`}>
-                          {c.exam}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-foreground">{c.year}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{c.phase}</td>
-                      <td className="px-4 py-3">
-                        <span className="px-2 py-0.5 rounded-md bg-secondary text-secondary-foreground text-xs font-medium">
-                          {c.category}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-foreground font-mono">{c.openingRank.toLocaleString()}</td>
-                      <td className="px-4 py-3 text-foreground font-mono">{c.closingRank.toLocaleString()}</td>
-                      <td className="px-4 py-3 text-accent font-mono font-medium">{c.openingPercentile.toFixed(1)}</td>
-                      <td className="px-4 py-3 text-accent font-mono font-medium">{c.closingPercentile.toFixed(1)}</td>
-                    </tr>
+                  {sorted.map((c, index) =>
+                  (<tr key={index} className="border-b border-border/30 hover:bg-muted/30 transition-colors">
+                    <td className="px-4 py-3">
+                      <span className={`px-2 py-0.5 rounded-md text-xs font-medium ${getBadgeClass(c.exam)}`}>
+                        {c.exam}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-foreground">{c.year}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{c.phase}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{c.gender}</td>
+                    <td className="px-4 py-3">
+                      <span className="px-2 py-0.5 rounded-md bg-secondary text-secondary-foreground text-xs font-medium">
+                        {c.category}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 font-mono">
+                      {c.startRank.toLocaleString()}
+                    </td>
+
+                    <td className="px-4 py-3 font-mono">
+                      {c.endRank.toLocaleString()}
+                    </td>
+
+                    <td className="px-4 py-3 font-mono">
+                      {c.startPercentile != null
+                        ? c.startPercentile.toFixed(2)
+                        : "-"}
+                    </td>
+
+                    <td className="px-4 py-3 font-mono">
+                      {c.endPercentile != null
+                        ? c.endPercentile.toFixed(2)
+                        : "-"}
+                    </td>
+                  </tr>
                   ))}
                 </tbody>
               </table>

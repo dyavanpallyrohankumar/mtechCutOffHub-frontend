@@ -20,7 +20,7 @@ const sidebarLinks = [
 ];
 
 const AdminLayout = () => {
-  const { email, logout } = useAuth();
+  const { username, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -42,9 +42,8 @@ const AdminLayout = () => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:sticky top-0 left-0 z-50 lg:z-auto h-screen w-64 flex-shrink-0 border-r border-border bg-card/80 backdrop-blur-xl flex flex-col transition-transform lg:translate-x-0 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed lg:sticky top-0 left-0 z-50 lg:z-auto h-screen w-64 flex-shrink-0 border-r border-border bg-card/80 backdrop-blur-xl flex flex-col transition-transform lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         <div className="h-16 flex items-center gap-2 px-5 border-b border-border/50">
           <div className="w-8 h-8 rounded-lg btn-gradient flex items-center justify-center">
@@ -65,11 +64,10 @@ const AdminLayout = () => {
                 key={link.path}
                 to={link.path}
                 onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                  active
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                }`}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${active
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  }`}
               >
                 <Icon className="w-4 h-4" />
                 {link.label}
@@ -79,7 +77,7 @@ const AdminLayout = () => {
         </nav>
 
         <div className="p-3 border-t border-border/50">
-          <div className="px-3 py-2 text-xs text-muted-foreground truncate">{email}</div>
+          <div className="px-3 py-2 text-xs text-muted-foreground truncate">{username}</div>
           <button
             onClick={handleLogout}
             className="flex items-center gap-2 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"

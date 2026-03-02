@@ -16,6 +16,9 @@ interface Allotment {
   category: string;
 }
 
+
+
+
 const demoAllotments: Allotment[] = [
   { id: 1, studentName: "Rahul Kumar", rank: 150, percentile: 98.5, collegeCode: "E001", branchCode: "CS", exam: "GATE", year: 2025, category: "GM" },
   { id: 2, studentName: "Priya Sharma", rank: 320, percentile: 96.2, collegeCode: "E002", branchCode: "AI", exam: "GATE", year: 2025, category: "OBC" },

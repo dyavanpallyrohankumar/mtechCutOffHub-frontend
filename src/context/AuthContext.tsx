@@ -1,53 +1,62 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import { createContext, useContext, useState, ReactNode } from "react";
 
-interface AuthState {
+interface AuthContextType {
   token: string | null;
-  email: string | null;
-  isAuthenticated: boolean;
-}
-
-interface AuthContextType extends AuthState {
-  login: (token: string, email: string) => void;
+  username: string | null;
+  pendingUsername: string | null;
+  setPendingUsername: (username: string | null) => void;
+  login: (token: string, username: string) => void;
   logout: () => void;
-  setPendingEmail: (email: string) => void;
-  pendingEmail: string | null;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [state, setState] = useState<AuthState>(() => {
-    const token = sessionStorage.getItem("auth_token");
-    const email = sessionStorage.getItem("auth_email");
-    return {
-      token,
-      email,
-      isAuthenticated: !!token,
-    };
-  });
-  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [token, setToken] = useState<string | null>(
+    sessionStorage.getItem("auth_token")
+  );
 
-  const login = useCallback((token: string, email: string) => {
-    sessionStorage.setItem("auth_token", token);
-    sessionStorage.setItem("auth_email", email);
-    setState({ token, email, isAuthenticated: true });
-  }, []);
+  const [username, setUsername] = useState<string | null>(
+    sessionStorage.getItem("auth_username")
+  );
 
-  const logout = useCallback(() => {
-    sessionStorage.removeItem("auth_token");
-    sessionStorage.removeItem("auth_email");
-    setState({ token: null, email: null, isAuthenticated: false });
-  }, []);
+  const [pendingUsername, setPendingUsername] = useState<string | null>(null);
+
+  const login = (jwtToken: string, user: string) => {
+    sessionStorage.setItem("auth_token", jwtToken);
+    sessionStorage.setItem("auth_username", user);
+
+    setToken(jwtToken);
+    setUsername(user);
+    setPendingUsername(null);
+  };
+
+  const logout = () => {
+    sessionStorage.clear();
+    setToken(null);
+    setUsername(null);
+    setPendingUsername(null);
+  };
 
   return (
-    <AuthContext.Provider value={{ ...state, login, logout, pendingEmail, setPendingEmail }}>
+    <AuthContext.Provider
+      value={{
+        token,
+        username,
+        pendingUsername,
+        setPendingUsername,
+        login,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
-
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) throw new Error("useAuth must be used within AuthProvider");
+  if (!context) {
+    throw new Error("useAuth must be used inside AuthProvider");
+  }
   return context;
 };

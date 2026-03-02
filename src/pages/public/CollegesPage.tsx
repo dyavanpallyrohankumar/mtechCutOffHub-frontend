@@ -8,14 +8,14 @@ import EmptyState from "@/components/EmptyState";
 
 // Demo data for display without backend
 const demoColleges: College[] = [
-  { id: 1, collegeCode: "E001", collegeName: "University Visvesvaraya College of Engineering", collegeType: "Government", university: "Bangalore University" },
-  { id: 2, collegeCode: "E002", collegeName: "BMS College of Engineering", collegeType: "Private Aided", university: "VTU" },
-  { id: 3, collegeCode: "E003", collegeName: "RV College of Engineering", collegeType: "Private Aided", university: "VTU" },
-  { id: 4, collegeCode: "E004", collegeName: "PES University", collegeType: "Private", university: "PES University" },
-  { id: 5, collegeCode: "E005", collegeName: "MS Ramaiah Institute of Technology", collegeType: "Private Aided", university: "VTU" },
-  { id: 6, collegeCode: "E006", collegeName: "National Institute of Technology Karnataka", collegeType: "Government", university: "NITK" },
-  { id: 7, collegeCode: "E007", collegeName: "JSS Science and Technology University", collegeType: "Private", university: "JSSSTU" },
-  { id: 8, collegeCode: "E008", collegeName: "Siddaganga Institute of Technology", collegeType: "Private Aided", university: "VTU" },
+  { id: 1, collegeCode: "E001", collegeName: "University Visvesvaraya College of Engineering", collegeType: "Government", universityName: "Bangalore University", collegeAddress: "bg" },
+  { id: 2, collegeCode: "E002", collegeName: "BMS College of Engineering", collegeType: "Private Aided", universityName: "VTU", collegeAddress: "bg" },
+  { id: 3, collegeCode: "E003", collegeName: "RV College of Engineering", collegeType: "Private Aided", universityName: "VTU", collegeAddress: "bg" },
+  { id: 4, collegeCode: "E004", collegeName: "PES University", collegeType: "Private", universityName: "PES University", collegeAddress: "bg" },
+  { id: 5, collegeCode: "E005", collegeName: "MS Ramaiah Institute of Technology", collegeType: "Private Aided", universityName: "VTU", collegeAddress: "bg" },
+  { id: 6, collegeCode: "E006", collegeName: "National Institute of Technology Karnataka", collegeType: "Government", universityName: "NITK", collegeAddress: "bg" },
+  { id: 7, collegeCode: "E007", collegeName: "JSS Science and Technology University", collegeType: "Private", universityName: "JSSSTU", collegeAddress: "bg" },
+  { id: 8, collegeCode: "E008", collegeName: "Siddaganga Institute of Technology", collegeType: "Private Aided", universityName: "VTU", collegeAddress: "bg" },
 ];
 
 const CollegesPage = () => {
@@ -30,11 +30,16 @@ const CollegesPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await collegeApi.getAll({ page, size: 12, search: search || undefined });
+
+      const res = await collegeApi.getAll({
+        page,
+        size: 12,
+        search: search || undefined,
+      });
+
       setColleges(res.data.content);
       setTotalPages(res.data.totalPages);
     } catch {
-      // Use demo data on API failure
       setColleges(demoColleges);
       setTotalPages(1);
     } finally {
@@ -42,15 +47,20 @@ const CollegesPage = () => {
     }
   }, [page, search]);
 
+
+  useEffect(() => {
+    setPage(0);
+  }, [search]);
+
   useEffect(() => {
     fetchColleges();
   }, [fetchColleges]);
 
-  const filtered = colleges.filter((c) =>
-    c.collegeName.toLowerCase().includes(search.toLowerCase()) ||
-    c.university.toLowerCase().includes(search.toLowerCase())
-  );
-
+  // const filtered = colleges.filter((c) =>
+  //   c.collegeName.toLowerCase().includes(search.toLowerCase()) ||
+  //   c.universityName.toLowerCase().includes(search.toLowerCase())
+  // );
+  const filtered = colleges;
   return (
     <div className="min-h-screen py-10 px-4">
       <div className="container mx-auto max-w-6xl">
@@ -83,8 +93,8 @@ const CollegesPage = () => {
           <EmptyState title="No colleges found" description="Try a different search term" />
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filtered.map((college) => (
-              <div key={college.id} className="glass-card-hover p-5 flex flex-col">
+            {colleges.map((college) => (
+              <div key={college.collegeCode} className="glass-card-hover p-5 flex flex-col">
                 <div className="flex items-start gap-3 mb-4">
                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                     <Building2 className="w-5 h-5 text-primary" />
@@ -93,19 +103,27 @@ const CollegesPage = () => {
                     <h3 className="font-semibold text-foreground text-sm leading-tight mb-1 line-clamp-2">
                       {college.collegeName}
                     </h3>
-                    <p className="text-xs text-muted-foreground">{college.collegeCode}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {college.collegeCode}
+                    </p>
                   </div>
                 </div>
-                <div className="flex gap-2 mb-4 flex-wrap">
+
+                <div className="flex gap-2 mb-3 flex-wrap">
                   <span className="px-2 py-0.5 rounded-md bg-accent/10 text-accent text-xs font-medium">
                     {college.collegeType}
                   </span>
                   <span className="px-2 py-0.5 rounded-md bg-secondary text-secondary-foreground text-xs">
-                    {college.university}
+                    {college.universityName}
                   </span>
                 </div>
+
+                <p className="text-xs text-muted-foreground mb-4 line-clamp-1">
+                  {college.collegeAddress}
+                </p>
+
                 <Link
-                  to={`/colleges/${college.id}/branches`}
+                  to={`/colleges/${college.collegeCode}/branches`}
                   className="mt-auto inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
                 >
                   View Branches

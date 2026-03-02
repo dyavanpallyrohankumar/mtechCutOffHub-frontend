@@ -3,18 +3,33 @@ import { Plus, Pencil, Trash2, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type { College } from "@/api/collegeApi";
-
+import { useEffect } from "react";
+import { collegeApi } from "@/api/collegeApi";
 const initialColleges: College[] = [
-  { id: 1, collegeCode: "E001", collegeName: "UVCE", collegeType: "Government", university: "Bangalore University" },
-  { id: 2, collegeCode: "E002", collegeName: "BMS College of Engineering", collegeType: "Private Aided", university: "VTU" },
-  { id: 3, collegeCode: "E003", collegeName: "RV College of Engineering", collegeType: "Private Aided", university: "VTU" },
+  { id: 1, collegeCode: "E001", collegeName: "UVCE", collegeType: "Government", universityName: "Bangalore University", collegeAddress: "hi" },
+  { id: 2, collegeCode: "E002", collegeName: "BMS College of Engineering", collegeType: "Private Aided", universityName: "VTU", collegeAddress: "hi" },
+  { id: 3, collegeCode: "E003", collegeName: "RV College of Engineering", collegeType: "Private Aided", universityName: "VTU", collegeAddress: "hi" },
 ];
 
 const ManageColleges = () => {
   const [colleges, setColleges] = useState<College[]>(initialColleges);
+
+
+  useEffect(() => {
+    fetchColleges();
+  }, []);
+
+  const fetchColleges = async () => {
+    try {
+      const res = await collegeApi.getAllColleges();
+      setColleges(res.data);
+    } catch (error) {
+      toast.error("Failed to fetch colleges");
+    }
+  };
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<College | null>(null);
-  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const { register, handleSubmit, reset, setValue } = useForm<Partial<College>>();
 
   const openAdd = () => { setEditing(null); reset({}); setModalOpen(true); };
@@ -24,23 +39,34 @@ const ManageColleges = () => {
     setModalOpen(true);
   };
 
-  const onSubmit = (data: Partial<College>) => {
-    if (editing) {
-      setColleges((prev) => prev.map((c) => (c.id === editing.id ? { ...c, ...data } as College : c)));
-      toast.success("College updated");
-    } else {
-      setColleges((prev) => [...prev, { ...data, id: Date.now() } as College]);
-      toast.success("College added");
+  const onSubmit = async (data: Partial<College>) => {
+    try {
+      if (editing) {
+        await collegeApi.update(data);
+        toast.success("College updated");
+      } else {
+        await collegeApi.create(data);
+        toast.success("College added");
+      }
+
+      fetchColleges(); // refresh list
+      setModalOpen(false);
+      reset({});
+    } catch (error) {
+      toast.error("Operation failed");
     }
-    setModalOpen(false);
-    reset({});
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (deleteId !== null) {
-      setColleges((prev) => prev.filter((c) => c.id !== deleteId));
+      try {
+        await collegeApi.delete(deleteId);
+        toast.success("College deleted");
+        fetchColleges();
+      } catch {
+        toast.error("Delete failed");
+      }
       setDeleteId(null);
-      toast.success("College deleted");
     }
   };
 
@@ -67,14 +93,14 @@ const ManageColleges = () => {
             </thead>
             <tbody>
               {colleges.map((c) => (
-                <tr key={c.id} className="border-b border-border/30 hover:bg-muted/30 transition-colors">
+                <tr key={`${c.collegeCode}-${c.id}`} className="border-b border-border/30 hover:bg-muted/30 transition-colors">
                   <td className="px-4 py-3 font-mono text-foreground">{c.collegeCode}</td>
                   <td className="px-4 py-3 text-foreground">{c.collegeName}</td>
                   <td className="px-4 py-3"><span className="px-2 py-0.5 rounded-md bg-accent/10 text-accent text-xs font-medium">{c.collegeType}</span></td>
-                  <td className="px-4 py-3 text-muted-foreground">{c.university}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{c.universityName}</td>
                   <td className="px-4 py-3 text-right">
                     <button onClick={() => openEdit(c)} className="p-1.5 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"><Pencil className="w-3.5 h-3.5" /></button>
-                    <button onClick={() => setDeleteId(c.id)} className="p-1.5 rounded-md hover:bg-destructive/10 transition-colors text-muted-foreground hover:text-destructive ml-1"><Trash2 className="w-3.5 h-3.5" /></button>
+                    <button onClick={() => setDeleteId(c.collegeCode)} className="p-1.5 rounded-md hover:bg-destructive/10 transition-colors text-muted-foreground hover:text-destructive ml-1"><Trash2 className="w-3.5 h-3.5" /></button>
                   </td>
                 </tr>
               ))}
@@ -96,7 +122,7 @@ const ManageColleges = () => {
                 { name: "collegeCode", label: "College Code", placeholder: "E001" },
                 { name: "collegeName", label: "College Name", placeholder: "Enter name" },
                 { name: "collegeType", label: "Type", placeholder: "Government / Private" },
-                { name: "university", label: "University", placeholder: "VTU" },
+                { name: "universityName", label: "University", placeholder: "VTU" },
               ].map((f) => (
                 <div key={f.name}>
                   <label className="text-xs font-medium text-muted-foreground mb-1 block">{f.label}</label>

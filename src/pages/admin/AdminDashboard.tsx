@@ -9,13 +9,12 @@ const stats = [
 ];
 
 const AdminDashboard = () => {
-  const { email } = useAuth();
-
+  const { username } = useAuth();
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-        <p className="text-sm text-muted-foreground mt-1">Welcome back, {email}</p>
+        <p className="text-sm text-muted-foreground mt-1">Welcome back, {username}</p>
       </div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">

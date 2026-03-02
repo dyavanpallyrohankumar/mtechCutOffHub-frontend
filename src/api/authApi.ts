@@ -1,19 +1,13 @@
 import axiosInstance from "./axiosInstance";
 
 export interface LoginPayload {
-  email: string;
+  username: string;
   password: string;
 }
 
 export interface OtpPayload {
-  email: string;
+  username: string;
   otp: string;
-}
-
-export interface RegisterPayload {
-  email: string;
-  password: string;
-  name: string;
 }
 
 export const authApi = {
@@ -23,6 +17,5 @@ export const authApi = {
   verifyOtp: (data: OtpPayload) =>
     axiosInstance.post("/api/admin/auth/verify-otp", data),
 
-  register: (data: RegisterPayload) =>
-    axiosInstance.post("/api/admin/auth/register", data),
+
 };
