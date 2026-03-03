@@ -26,6 +26,12 @@ export interface CutoffData {
   endPercentile: number | null;
 }
 
+export interface BackendResponse {
+  collegeId: number;
+  branchId: number;
+  years: any[];
+}
+
 export const cutoffApi = {
   getBranches: (collegeId: string) =>
     axiosInstance.get<CollegeDetails>(`/api/public/colleges/${collegeId}/branches`),
@@ -38,12 +44,13 @@ export const cutoffApi = {
     branchId: string,
     params?: Record<string, string>
   ) =>
-    axiosInstance.get<CutoffData[]>(
+    axiosInstance.get<BackendResponse>(
       `/api/public/cutoffs/college/${collegeId}/branch/${branchId}`,
       { params }
     ),
 
-  createBranch: (collegeCode: string, data: Partial<Branch>[]) =>
-    axiosInstance.post(`/api/admin/colleges/${collegeCode}/branches`, data),
+
+
+
 };
 
