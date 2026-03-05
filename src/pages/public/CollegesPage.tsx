@@ -109,21 +109,60 @@ const CollegesPage = () => {
   const [activeType, setActiveType] = useState("All");
   const [page, setPage] = useState(0);
 
+  const DEMO: College[] = [
+    { id: 1, collegeCode: "E001", collegeName: "University Visvesvaraya College of Engineering", collegeType: "Government", universityName: "Bangalore University", collegeAddress: "Bengaluru" },
+    { id: 2, collegeCode: "E002", collegeName: "BMS College of Engineering", collegeType: "Private Aided", universityName: "VTU", collegeAddress: "Bengaluru" },
+    { id: 3, collegeCode: "E003", collegeName: "RV College of Engineering", collegeType: "Private Aided", universityName: "VTU", collegeAddress: "Bengaluru" },
+  ];
+
+
   useEffect(() => { setPage(0); }, [search, activeType]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [page]);
 
+  // useEffect(() => {
+  //   (async () => {
+  //     try {
+  //       const res = await collegeApi.getAll({ page: 0, size: 10000 });
+  //       setAllColleges(res.data.content);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   })();
+  // }, []);
+
   useEffect(() => {
-    (async () => {
+    let cancelled = false;
+
+    const fetchColleges = async () => {
       try {
+        setLoading(true);
+
         const res = await collegeApi.getAll({ page: 0, size: 10000 });
-        setAllColleges(res.data.content);
+
+        if (!cancelled) {
+          setAllColleges(res.data.content);
+        }
+      } catch (err) {
+        console.warn("API failed — using demo data");
+
+        if (!cancelled) {
+          setAllColleges(DEMO);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
-    })();
+    };
+
+    fetchColleges();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const types = useMemo(() => {

@@ -73,17 +73,53 @@ const BranchesPage = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
+
+  const demoBranches: Branch[] = [
+    { id: 1, branchName: "Computer Science & Engineering", branchCode: "CS", collegeProgramCode: "CS101" },
+    { id: 2, branchName: "Artificial Intelligence & ML", branchCode: "AI", collegeProgramCode: "AI101" },
+    { id: 3, branchName: "Data Science", branchCode: "DS", collegeProgramCode: "DS101" },
+    { id: 4, branchName: "Electronics & Communication", branchCode: "EC", collegeProgramCode: "EC101" },
+    { id: 5, branchName: "VLSI Design", branchCode: "VL", collegeProgramCode: "VL101" },
+    { id: 6, branchName: "Structural Engineering", branchCode: "SE", collegeProgramCode: "SE101" },];
+
+
+  const demoCollege: CollegeDetails = {
+    collegeName: "Demo Engineering College",
+    collegeAddress: "Bengaluru",
+    collegeCode: "DEMO01",
+    universityName: "Demo University",
+    collegeType: "Private",
+    branches: demoBranches,
+  };
   useEffect(() => {
     if (!collegeId) return;
+
+    let cancelled = false;
     setLoading(true);
+
     cutoffApi.getBranches(String(collegeId))
       .then((res) => {
+        if (cancelled) return;
+
         const data: CollegeDetails = res.data;
+
         setCollege(data);
-        setBranches(data.branches ?? []);
+        setBranches(data.branches?.length ? data.branches : demoBranches);
       })
-      .catch(() => { setCollege(null); setBranches([]); })
-      .finally(() => setLoading(false));
+      .catch(() => {
+        if (cancelled) return;
+        setCollege(demoCollege);
+        setBranches(demoBranches);
+        console.warn("Branches API failed — using demo branches");
+
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [collegeId]);
 
   const filtered = branches.filter((b) =>
