@@ -236,6 +236,22 @@ const CollegesPage = () => {
   min-height: 100vh;
 }
 
+[data-theme="dark"] .cp-root {
+
+  --bg-main: #0b0f1a;
+  --bg-card: #111827;
+  --bg-section: #0f172a;
+
+  --text-main: #f1f5f9;
+  --text-secondary: #cbd5f5;
+  --text-muted: #94a3b8;
+
+  --border: #1f2937;
+
+  --cp-shimmer: #1e293b;
+
+}
+
 /* ── Layout ── */
 .cp-page {
   background: var(--bg-main);

@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 
 export default function HomePage() {
   const { theme, toggle } = useTheme();
-  const dark = theme === "dark";
+  // const dark = theme === "dark";
 
   const features = [
     { emoji: "📊", title: "Cutoff Analytics", desc: "Opening & closing ranks across years, categories, phases — visualized cleanly.", from: "#6366f1", to: "#8b5cf6" },
@@ -51,10 +51,10 @@ export default function HomePage() {
       <div className="hm-page">
 
         {/* ── NAV ── */}
-        <nav className="hm-nav">
+        {/* <nav className="hm-nav">
           <a href="/" className="hm-nav-logo">
             <div className="hm-logo-icon">🎓</div>
-            <span>MTech<span className="hm-logo-accent">Hub</span></span>
+            <span>MTech<span className="hm-logo-accent">CutOffHub</span></span>
           </a>
           <div className="hm-nav-links">
             <a href="/colleges" className="hm-nav-link">Colleges</a>
@@ -65,7 +65,7 @@ export default function HomePage() {
             </button>
             <a href="/admin/login" className="hm-nav-cta">Admin Portal</a>
           </div>
-        </nav>
+        </nav> */}
 
         {/* ── HERO ── */}
         <section className="hm-hero">
@@ -253,15 +253,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── FOOTER ── */}
-        <footer className="hm-footer">
-          <p className="hm-footer-text">© 2026 MTech Cutoff Hub · Built for students, by students.</p>
-          <div className="hm-footer-links">
-            <a href="/privacy-policy" className="hm-footer-link">Privacy Policy</a>
-            <a href="/contact" className="hm-footer-link">Contact</a>
-            <a href="/admin/login" className="hm-footer-link">Admin</a>
-          </div>
-        </footer>
 
       </div>
     </div>
