@@ -1,6 +1,6 @@
 {
     "git": {
-        "deploymentEnabled": true
+        "deploymentEnabled": false
     },
     "framework": "vite",
     "buildCommand": "npm run build",
