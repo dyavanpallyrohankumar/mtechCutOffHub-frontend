@@ -19,6 +19,8 @@ import BranchesPage from "./pages/public/BranchesPage";
 import CutoffsPage from "./pages/public/CutoffsPage";
 import PrivacyPolicyPage from "./pages/public/PrivacyPolicyPage";
 import ContactPage from "./pages/public/ContactPage";
+import BranchesExplorerPage from "./pages/public/BranchesExplorePage";
+import BranchCollegesPage from "./pages/public/BranchCollegesPage";
 
 // Admin pages (lazy loaded)
 const AdminLoginPage = lazy(() => import("./pages/admin/AdminLoginPage"));
@@ -52,6 +54,8 @@ const App = () => (
                 <Route path="/colleges" element={<CollegesPage />} />
                 <Route path="/colleges/:collegeId/branches" element={<BranchesPage />} />
                 <Route path="/colleges/:collegeId/branches/:branchId/cutoffs" element={<CutoffsPage />} />
+                <Route path="/branches" element={<BranchesExplorerPage />} />
+                <Route path="/branches/:branchCode" element={<BranchCollegesPage />} />
                 <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                 <Route path="/contact" element={<ContactPage />} />
               </Route>
