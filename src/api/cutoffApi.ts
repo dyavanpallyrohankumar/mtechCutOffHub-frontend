@@ -1,56 +1,17 @@
+import { BranchCutoffStructuredResponseDTO, CutoffSummaryDTO } from "@/types/cutoff";
 import axiosInstance from "./axiosInstance";
 
-export interface Branch {
-  id: number;
-  branchName: string;
-  branchCode: string;
-  collegeProgramCode: string;
-}
-export interface CollegeDetails {
-  collegeName: string;
-  collegeAddress: string;
-  collegeCode: string;
-  universityName: string;
-  collegeType: string;
-  branches: Branch[];
-}
-export interface CutoffData {
-  exam: string;
-  year: number;
-  phase: string;
-  gender: string;
-  category: string;
-  startRank: number;
-  endRank: number;
-  startPercentile: number | null;
-  endPercentile: number | null;
-}
-
-export interface BackendResponse {
-  collegeId: number;
-  branchId: number;
-  years: any[];
-}
-
 export const cutoffApi = {
-  getBranches: (collegeId: string) =>
-    axiosInstance.get<CollegeDetails>(`/api/public/colleges/${collegeId}/branches`),
 
-
-
-
-  getCutoffs: (
-    collegeId: string,
-    branchId: string,
-    params?: Record<string, string>
-  ) =>
-    axiosInstance.get<BackendResponse>(
-      `/api/public/cutoffs/college/${collegeId}/branch/${branchId}`,
-      { params }
+  // GET /api/public/cutoffs/exam/{examCode}/college/{collegeID}
+  getCollegeCutoffs: (examCode: string, collegeId: string) =>
+    axiosInstance.get<CutoffSummaryDTO[]>(
+      `/api/public/cutoffs/exam/${examCode}/college/${collegeId}`,
     ),
 
-
-
-
+  // GET /api/public/cutoffs/program/{programCode}
+  getProgramCutoffs: (programCode: string) =>
+    axiosInstance.get<BranchCutoffStructuredResponseDTO>(
+      `/api/public/cutoffs/program/${programCode}`,
+    ),
 };
-

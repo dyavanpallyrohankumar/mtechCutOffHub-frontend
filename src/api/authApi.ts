@@ -12,10 +12,10 @@ export interface OtpPayload {
 
 export const authApi = {
   login: (data: LoginPayload) =>
-    axiosInstance.post("/api/admin/auth/login", data),
+    axiosInstance.post("/api/auth/login", data),
 
   verifyOtp: (data: OtpPayload) =>
-    axiosInstance.post("/api/admin/auth/verify-otp", data),
+    axiosInstance.post("/api/auth/verify-otp", data),
 
 
 };

@@ -21,6 +21,9 @@ import PrivacyPolicyPage from "./pages/public/PrivacyPolicyPage";
 import ContactPage from "./pages/public/ContactPage";
 import BranchesExplorerPage from "./pages/public/BranchesExplorePage";
 import BranchCollegesPage from "./pages/public/BranchCollegesPage";
+import ExamsPage from "./pages/public/ExamsPage";
+import StatesPage from "./pages/public/StatesPage";
+import ExamDetailsPage from "./pages/public/ExamDetailsPage";
 
 // Admin pages (lazy loaded)
 const AdminLoginPage = lazy(() => import("./pages/admin/AdminLoginPage"));
@@ -51,11 +54,26 @@ const App = () => (
               {/* Public */}
               <Route element={<PublicLayout />}>
                 <Route path="/" element={<HomePage />} />
+
+                {/* State Selection */}
+                <Route path="/states" element={<StatesPage />} />
+
+                {/* Exam Selection */}
+                <Route path="/exams" element={<ExamsPage />} />
+                <Route path="/exams/:examCode" element={<ExamDetailsPage />} />
+
+                {/* Colleges */}
                 <Route path="/colleges" element={<CollegesPage />} />
-                <Route path="/colleges/:collegeId/branches" element={<BranchesPage />} />
-                <Route path="/colleges/:collegeId/branches/:branchId/cutoffs" element={<CutoffsPage />} />
+
+                {/* Branches of a College */}
+                <Route path="/exams/:examCode/colleges/:collegeCode/branches" element={<BranchesPage />} />
+
+                {/* Cutoffs */}
+                <Route path="/exams/:examCode/colleges/:collegeCode/programs/:programCode/cutoffs"element={<CutoffsPage />}/>
+                {/* Branch Explorer */}
                 <Route path="/branches" element={<BranchesExplorerPage />} />
-                <Route path="/branches/:branchCode" element={<BranchCollegesPage />} />
+                <Route path="/exams/:examCode/course/:courseCode" element={<BranchCollegesPage />} />
+
                 <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                 <Route path="/contact" element={<ContactPage />} />
               </Route>
