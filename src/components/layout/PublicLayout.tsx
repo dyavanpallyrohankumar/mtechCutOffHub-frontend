@@ -18,7 +18,7 @@ const PublicLayout = () => {
 
           {/* Left */}
           <div className="text-center sm:text-left">
-            © {new Date().getFullYear()} MTech Cutoff Hub
+            © {new Date().getFullYear()} Cutoff Hub
           </div>
 
           {/* Center Links */}

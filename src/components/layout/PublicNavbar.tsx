@@ -39,7 +39,7 @@ const PublicNavbar = () => {
             <GraduationCap className="w-5 h-5 text-primary-foreground" />
           </div>
           <span className="text-lg font-bold tracking-tight">
-            MTech <span className="text-primary">Cutoff Hub</span>
+             <span className="text-primary">Cutoff Hub</span>
           </span>
         </Link>
 
