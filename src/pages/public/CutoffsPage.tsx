@@ -1,36 +1,77 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
-  ArrowLeft, Download, SlidersHorizontal,
-  TrendingDown, TrendingUp, BarChart2, Sparkles, ChevronDown
+  ArrowLeft,
+  Download,
+  SlidersHorizontal,
+  TrendingDown,
+  TrendingUp,
+  BarChart2,
+  Sparkles,
+  ChevronDown,
 } from "lucide-react";
-import { BackendResponse, cutoffApi, CutoffData } from "@/api/cutoffApi";
+import { cutoffApi } from "@/api/cutoffApi";
 import GoogleAd from "@/components/GoogleAd";
-
-/* ─── Demo data ─────────────────────────── */
-const DEMO: CutoffData[] = [
-  { exam: "GATE", year: 2025, phase: "Phase I", gender: "General", category: "GM", startRank: 150, endRank: 890, startPercentile: 98.5, endPercentile: 92.1 },
-  { exam: "GATE", year: 2025, phase: "Phase I", gender: "General", category: "SC", startRank: 1200, endRank: 3500, startPercentile: 88.0, endPercentile: 72.5 },
-  { exam: "GATE", year: 2025, phase: "Phase II", gender: "General", category: "GM", startRank: 900, endRank: 1500, startPercentile: 92.0, endPercentile: 85.0 },
-  { exam: "PGCET", year: 2025, phase: "Phase I", gender: "General", category: "GM", startRank: 50, endRank: 450, startPercentile: 99.0, endPercentile: 94.0 },
-  { exam: "PGCET", year: 2025, phase: "Phase I", gender: "General", category: "OBC", startRank: 500, endRank: 2000, startPercentile: 94.0, endPercentile: 80.0 },
-  { exam: "GATE", year: 2024, phase: "Phase I", gender: "General", category: "GM", startRank: 180, endRank: 950, startPercentile: 97.8, endPercentile: 91.0 },
-  { exam: "GATE", year: 2024, phase: "Phase I", gender: "Female", category: "SC", startRank: 800, endRank: 2200, startPercentile: 91.2, endPercentile: 78.0 },
-  { exam: "PGCET", year: 2024, phase: "Phase II", gender: "General", category: "BC-A", startRank: 300, endRank: 1800, startPercentile: 96.0, endPercentile: 82.0 },
-];
+import { CutoffData } from "@/types/cutoff";
 
 const EXAM_OPTIONS = ["All", "GATE", "PGCET"];
 const PHASE_OPTIONS = ["All", "PHASE I", "PHASE II"];
-const CATEGORY_OPTIONS = ["All", "GM", "OC", "SC", "ST", "OBC", "BC-A", "BC-B", "BC-C", "BC-D", "BC-E"];
+const CATEGORY_OPTIONS = [
+  "All",
+  "GM",
+  "OC",
+  "SC",
+  "ST",
+  "OBC",
+  "BC-A",
+  "BC-B",
+  "BC-C",
+  "BC-D",
+  "BC-E",
+];
 const YEAR_OPTIONS = ["All", "2025", "2024", "2023", "2022"];
 
 /* ─── Competition tier ────────────────── */
 function tier(endRank: number) {
-  if (endRank <= 500) return { label: "Very High", bg: "rgba(239,68,68,0.10)", text: "#dc2626", bar: "#ef4444", pct: 95 };
-  if (endRank <= 1500) return { label: "High", bg: "rgba(249,115,22,0.10)", text: "#ea580c", bar: "#f97316", pct: 72 };
-  if (endRank <= 3000) return { label: "Medium", bg: "rgba(234,179,8,0.10)", text: "#ca8a04", bar: "#eab308", pct: 50 };
-  if (endRank <= 6000) return { label: "Moderate", bg: "rgba(34,197,94,0.10)", text: "#16a34a", bar: "#22c55e", pct: 30 };
-  return { label: "Open", bg: "rgba(14,165,233,0.10)", text: "#0284c7", bar: "#0ea5e9", pct: 15 };
+  if (endRank <= 500)
+    return {
+      label: "Very High",
+      bg: "rgba(239,68,68,0.10)",
+      text: "#dc2626",
+      bar: "#ef4444",
+      pct: 95,
+    };
+  if (endRank <= 1500)
+    return {
+      label: "High",
+      bg: "rgba(249,115,22,0.10)",
+      text: "#ea580c",
+      bar: "#f97316",
+      pct: 72,
+    };
+  if (endRank <= 3000)
+    return {
+      label: "Medium",
+      bg: "rgba(234,179,8,0.10)",
+      text: "#ca8a04",
+      bar: "#eab308",
+      pct: 50,
+    };
+  if (endRank <= 6000)
+    return {
+      label: "Moderate",
+      bg: "rgba(34,197,94,0.10)",
+      text: "#16a34a",
+      bar: "#22c55e",
+      pct: 30,
+    };
+  return {
+    label: "Open",
+    bg: "rgba(14,165,233,0.10)",
+    text: "#0284c7",
+    bar: "#0ea5e9",
+    pct: 15,
+  };
 }
 
 /* ─── Rank bar ────────────────────────── */
@@ -38,18 +79,39 @@ function RankBar({ endRank }: { endRank: number }) {
   const t = tier(endRank);
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-      <div style={{ flex: 1, height: 6, borderRadius: 99, background: "rgba(99,102,241,0.08)", overflow: "hidden", minWidth: 56 }}>
-        <div style={{
-          height: "100%", borderRadius: 99, width: `${t.pct}%`,
-          background: `linear-gradient(90deg,${t.bar}99,${t.bar})`,
-          animation: "ct-bar-in 0.9s cubic-bezier(0.34,1.56,0.64,1) both",
-        }} />
+      <div
+        style={{
+          flex: 1,
+          height: 6,
+          borderRadius: 99,
+          background: "rgba(99,102,241,0.08)",
+          overflow: "hidden",
+          minWidth: 56,
+        }}
+      >
+        <div
+          style={{
+            height: "100%",
+            borderRadius: 99,
+            width: `${t.pct}%`,
+            background: `linear-gradient(90deg,${t.bar}99,${t.bar})`,
+            animation: "ct-bar-in 0.9s cubic-bezier(0.34,1.56,0.64,1) both",
+          }}
+        />
       </div>
-      <span style={{
-        fontSize: "0.66rem", fontWeight: 800, color: t.text,
-        background: t.bg, padding: "2px 8px", borderRadius: 5,
-        whiteSpace: "nowrap",
-      }}>{t.label}</span>
+      <span
+        style={{
+          fontSize: "0.66rem",
+          fontWeight: 800,
+          color: t.text,
+          background: t.bg,
+          padding: "2px 8px",
+          borderRadius: 5,
+          whiteSpace: "nowrap",
+        }}
+      >
+        {t.label}
+      </span>
     </div>
   );
 }
@@ -57,15 +119,24 @@ function RankBar({ endRank }: { endRank: number }) {
 /* ─── Skeleton row ────────────────────── */
 function SkeletonRow({ i }: { i: number }) {
   return (
-    <tr style={{ animation: "ct-fade-up 0.4s ease both", animationDelay: `${i * 0.05}s` }}>
+    <tr
+      style={{
+        animation: "ct-fade-up 0.4s ease both",
+        animationDelay: `${i * 0.05}s`,
+      }}
+    >
       {[72, 44, 66, 54, 50, 64, 64, 56, 56, 110].map((w, j) => (
         <td key={j} style={{ padding: "13px 16px" }}>
-          <div style={{
-            height: 9, width: w, borderRadius: 5,
-            background: "rgba(99,102,241,0.09)",
-            animation: "ct-shimmer 1.4s ease infinite",
-            animationDelay: `${j * 0.07}s`,
-          }} />
+          <div
+            style={{
+              height: 9,
+              width: w,
+              borderRadius: 5,
+              background: "rgba(99,102,241,0.09)",
+              animation: "ct-shimmer 1.4s ease infinite",
+              animationDelay: `${j * 0.07}s`,
+            }}
+          />
         </td>
       ))}
     </tr>
@@ -74,8 +145,8 @@ function SkeletonRow({ i }: { i: number }) {
 
 /* ─── Main ────────────────────────────── */
 const CutoffsPage = () => {
-  const { collegeId, branchId } = useParams();
-  const [cutoffs, setCutoffs] = useState<CutoffData[]>(DEMO);
+  const { examCode, collegeCode, programCode } = useParams();
+  const [cutoffs, setCutoffs] = useState<CutoffData[]>([]);
   const [loading, setLoading] = useState(false);
   const [exam, setExam] = useState("All");
   const [phase, setPhase] = useState("All");
@@ -86,75 +157,143 @@ const CutoffsPage = () => {
   const [filtersOpen, setFiltersOpen] = useState(true);
 
   useEffect(() => {
-    if (!collegeId || !branchId) return;
-    setLoading(true);
-    const params: Record<string, string> = {};
-    if (exam !== "All") params.exam = exam;
-    if (phase !== "All") params.phase = phase;
-    if (category !== "All") params.category = category;
+    if (!programCode) return;
 
-    cutoffApi.getCutoffs(String(collegeId), String(branchId), params)
+    setLoading(true);
+
+    cutoffApi
+      .getProgramCutoffs(programCode)
       .then((res) => {
-        const data = res.data as BackendResponse;
-        if (!data?.years) { setCutoffs([]); return; }
+        const data = res.data;
+
         const flat: CutoffData[] = [];
-        data.years.forEach((yb: any) => {
-          yb.phases?.forEach((pb: any) => {
-            pb.categories?.forEach((cb: any) => {
-              cb.exams?.forEach((eb: any) => {
-                eb.genders?.forEach((gb: any) => {
+
+        data.years.forEach((year) => {
+          year.phases.forEach((phase) => {
+            phase.categories.forEach((category) => {
+              category.exams.forEach((examGroup) => {
+                examGroup.genders.forEach((gender) => {
                   flat.push({
-                    year: yb.year, phase: pb.phase, category: cb.category,
-                    exam: eb.exam, gender: gb.gender,
-                    startRank: gb.startRank, endRank: gb.endRank,
-                    startPercentile: gb.startPercentile, endPercentile: gb.endPercentile,
+                    exam: examGroup.exam,
+                    year: year.year,
+                    phase: phase.phase,
+                    category: category.category,
+                    gender: gender.gender,
+                    startRank: gender.startRank,
+                    endRank: gender.endRank,
+                    startPercentile: gender.startPercentile,
+                    endPercentile: gender.endPercentile,
                   });
                 });
               });
             });
           });
         });
+
         setCutoffs(flat);
       })
-      .catch(() => setCutoffs(DEMO))
-      .finally(() => setLoading(false));
-  }, [collegeId, branchId, exam, phase, category]);
+      .catch((err) => {
+        console.error(err);
+        setCutoffs([]);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [programCode]);
 
-  const filtered = useMemo(() => cutoffs.filter(c =>
-    (exam === "All" || c.exam === exam) &&
-    (phase === "All" || c.phase === phase) &&
-    (category === "All" || c.category === category) &&
-    (year === "All" || String(c.year) === year)
-  ), [cutoffs, exam, phase, category, year]);
+  const filtered = useMemo(() => {
+    return cutoffs.filter(
+      (c) =>
+        (exam === "All" || c.exam.examCode === exam) &&
+        (phase === "All" || c.phase === phase) &&
+        (category === "All" || c.category === category) &&
+        (year === "All" || String(c.year) === year),
+    );
+  }, [cutoffs, exam, phase, category, year]);
 
   const sorted = useMemo(() => {
     if (!sortKey) return filtered;
+
     return [...filtered].sort((a, b) => {
-      const av = a[sortKey], bv = b[sortKey];
-      if (typeof av === "number" && typeof bv === "number") return sortAsc ? av - bv : bv - av;
-      if (typeof av === "string" && typeof bv === "string") return sortAsc ? av.localeCompare(bv) : bv.localeCompare(av);
+      if (sortKey === "exam") {
+        return sortAsc
+          ? a.exam.examCode.localeCompare(b.exam.examCode)
+          : b.exam.examCode.localeCompare(a.exam.examCode);
+      }
+
+      const av = a[sortKey];
+      const bv = b[sortKey];
+
+      if (typeof av === "number" && typeof bv === "number") {
+        return sortAsc ? av - bv : bv - av;
+      }
+
+      if (typeof av === "string" && typeof bv === "string") {
+        return sortAsc ? av.localeCompare(bv) : bv.localeCompare(av);
+      }
+
       return 0;
     });
   }, [filtered, sortKey, sortAsc]);
 
   function handleSort(k: keyof CutoffData) {
-    if (sortKey === k) setSortAsc(s => !s);
-    else { setSortKey(k); setSortAsc(true); }
+    if (sortKey === k) setSortAsc((s) => !s);
+    else {
+      setSortKey(k);
+      setSortAsc(true);
+    }
   }
 
   function exportCSV() {
-    const hdr = ["Exam", "Year", "Phase", "Gender", "Category", "Opening Rank", "Closing Rank", "Opening %ile", "Closing %ile"];
-    const rows = sorted.map(c => [c.exam, c.year, c.phase, c.gender, c.category, c.startRank, c.endRank, c.startPercentile ?? "-", c.endPercentile ?? "-"].join(","));
-    const blob = new Blob([[hdr.join(","), ...rows].join("\n")], { type: "text/csv" });
-    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "cutoffs.csv"; a.click();
+    const hdr = [
+      "Exam",
+      "Year",
+      "Phase",
+      "Gender",
+      "Category",
+      "Opening Rank",
+      "Closing Rank",
+      "Opening %ile",
+      "Closing %ile",
+    ];
+    const rows = sorted.map((c) =>
+      [
+        c.exam.examCode,
+        c.year,
+        c.phase,
+        c.gender,
+        c.category,
+        c.startRank,
+        c.endRank,
+        c.startPercentile ?? "-",
+        c.endPercentile ?? "-",
+      ].join(","),
+    );
+    const blob = new Blob([[hdr.join(","), ...rows].join("\n")], {
+      type: "text/csv",
+    });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "cutoffs.csv";
+    a.click();
   }
 
-  const activeFilters = [exam, phase, category, year].filter(v => v !== "All").length;
-  const minRank = filtered.length ? Math.min(...filtered.map(c => c.startRank)) : 0;
-  const maxRank = filtered.length ? Math.max(...filtered.map(c => c.endRank)) : 0;
-  const avgPct = filtered.length && filtered.some(c => c.startPercentile != null)
-    ? (filtered.reduce((s, c) => s + (c.startPercentile ?? 0), 0) / filtered.length).toFixed(1)
-    : "–";
+  const activeFilters = [exam, phase, category, year].filter(
+    (v) => v !== "All",
+  ).length;
+  const minRank = filtered.length
+    ? Math.min(...filtered.map((c) => c.startRank))
+    : 0;
+  const maxRank = filtered.length
+    ? Math.max(...filtered.map((c) => c.endRank))
+    : 0;
+  const avgPct =
+    filtered.length && filtered.some((c) => c.startPercentile != null)
+      ? (
+          filtered.reduce((s, c) => s + (c.startPercentile ?? 0), 0) /
+          filtered.length
+        ).toFixed(1)
+      : "–";
 
   /* ── Styles ── */
   const css = `
@@ -488,14 +627,24 @@ const CutoffsPage = () => {
   `;
 
   /* Sort header helper */
-  const SortTh = ({ label, field, right }: { label: string; field: keyof CutoffData; right?: boolean }) => (
+  const SortTh = ({
+    label,
+    field,
+    right,
+  }: {
+    label: string;
+    field: keyof CutoffData;
+    right?: boolean;
+  }) => (
     <th
       className={`ct-th sort${sortKey === field ? " active" : ""}`}
       onClick={() => handleSort(field)}
       style={{ textAlign: right ? "right" : "left" }}
     >
       {label}
-      <span className="ct-sort-ic">{sortKey === field ? (sortAsc ? "↑" : "↓") : "⇅"}</span>
+      <span className="ct-sort-ic">
+        {sortKey === field ? (sortAsc ? "↑" : "↓") : "⇅"}
+      </span>
     </th>
   );
 
@@ -503,16 +652,17 @@ const CutoffsPage = () => {
     <div className="ct-root">
       <style>{css}</style>
       <div className="ct-page">
-
         {/* Atmosphere */}
         <div className="ct-blob ct-blob-1" />
         <div className="ct-blob ct-blob-2" />
         <div className="ct-blob ct-blob-3" />
 
         <div className="ct-inner">
-
           {/* Back */}
-          <Link to={`/colleges/${collegeId}/branches`} className="ct-back">
+          <Link
+            to={`/exams/${examCode}/colleges/${collegeCode}/branches`}
+            className="ct-back"
+          >
             <ArrowLeft size={13} /> Back to Branches
           </Link>
 
@@ -526,7 +676,8 @@ const CutoffsPage = () => {
                 Cutoff <span className="ct-title-hl">Analytics</span>
               </h1>
               <p className="ct-sub">
-                Opening &amp; closing ranks · category-wise · phase-wise · year-wise
+                Opening &amp; closing ranks · category-wise · phase-wise ·
+                year-wise
               </p>
             </div>
             <button className="ct-export" onClick={exportCSV}>
@@ -537,23 +688,32 @@ const CutoffsPage = () => {
           {/* Stat cards */}
           <div className="ct-stats">
             <div className="ct-stat">
-              <div className="ct-stat-label"><TrendingDown size={11} /> Best Opening</div>
+              <div className="ct-stat-label">
+                <TrendingDown size={11} /> Best Opening
+              </div>
               <div className="ct-stat-val" style={{ color: "#059669" }}>
                 {filtered.length ? minRank.toLocaleString() : "–"}
               </div>
               <div className="ct-stat-sub">lowest opening rank</div>
             </div>
             <div className="ct-stat">
-              <div className="ct-stat-label"><TrendingUp size={11} /> Closing Range</div>
+              <div className="ct-stat-label">
+                <TrendingUp size={11} /> Closing Range
+              </div>
               <div className="ct-stat-val" style={{ color: "#ea580c" }}>
                 {filtered.length ? maxRank.toLocaleString() : "–"}
               </div>
               <div className="ct-stat-sub">highest closing rank</div>
             </div>
             <div className="ct-stat">
-              <div className="ct-stat-label"><BarChart2 size={11} /> Avg Percentile</div>
+              <div className="ct-stat-label">
+                <BarChart2 size={11} /> Avg Percentile
+              </div>
               <div className="ct-stat-val" style={{ color: "#6366f1" }}>
-                {avgPct}{avgPct !== "–" && <span style={{ fontSize: "1.1rem" }}>%</span>}
+                {avgPct}
+                {avgPct !== "–" && (
+                  <span style={{ fontSize: "1.1rem" }}>%</span>
+                )}
               </div>
               <div className="ct-stat-sub">avg opening percentile</div>
             </div>
@@ -561,28 +721,64 @@ const CutoffsPage = () => {
 
           {/* Filters */}
           <div className="ct-filters">
-            <div className="ct-filters-header" onClick={() => setFiltersOpen(o => !o)}>
+            <div
+              className="ct-filters-header"
+              onClick={() => setFiltersOpen((o) => !o)}
+            >
               <div className="ct-filters-title">
                 <SlidersHorizontal size={14} />
                 Filters
                 {activeFilters > 0 && (
-                  <span className="ct-filters-badge">{activeFilters} active</span>
+                  <span className="ct-filters-badge">
+                    {activeFilters} active
+                  </span>
                 )}
               </div>
-              <ChevronDown size={16} className={`ct-chevron${filtersOpen ? " open" : ""}`} />
+              <ChevronDown
+                size={16}
+                className={`ct-chevron${filtersOpen ? " open" : ""}`}
+              />
             </div>
             {filtersOpen && (
               <div className="ct-filters-body">
                 {[
-                  { label: "Exam", val: exam, set: setExam, opts: EXAM_OPTIONS },
-                  { label: "Phase", val: phase, set: setPhase, opts: PHASE_OPTIONS },
-                  { label: "Category", val: category, set: setCategory, opts: CATEGORY_OPTIONS },
-                  { label: "Year", val: year, set: setYear, opts: YEAR_OPTIONS },
+                  {
+                    label: "Exam",
+                    val: exam,
+                    set: setExam,
+                    opts: EXAM_OPTIONS,
+                  },
+                  {
+                    label: "Phase",
+                    val: phase,
+                    set: setPhase,
+                    opts: PHASE_OPTIONS,
+                  },
+                  {
+                    label: "Category",
+                    val: category,
+                    set: setCategory,
+                    opts: CATEGORY_OPTIONS,
+                  },
+                  {
+                    label: "Year",
+                    val: year,
+                    set: setYear,
+                    opts: YEAR_OPTIONS,
+                  },
                 ].map(({ label, val, set, opts }) => (
                   <div className="ct-fg" key={label}>
                     <label>{label}</label>
-                    <select className="ct-select" value={val} onChange={e => set(e.target.value)}>
-                      {opts.map(o => <option key={o} value={o}>{o}</option>)}
+                    <select
+                      className="ct-select"
+                      value={val}
+                      onChange={(e) => set(e.target.value)}
+                    >
+                      {opts.map((o) => (
+                        <option key={o} value={o}>
+                          {o}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 ))}
@@ -599,17 +795,31 @@ const CutoffsPage = () => {
               <p className="ct-count">
                 <strong>{sorted.length}</strong> records
                 {activeFilters > 0 && (
-                  <span style={{ marginLeft: 6, color: "var(--ct-text3)", fontWeight: 500 }}>
+                  <span
+                    style={{
+                      marginLeft: 6,
+                      color: "var(--ct-text3)",
+                      fontWeight: 500,
+                    }}
+                  >
                     · filtered
                   </span>
                 )}
               </p>
               <div className="ct-legend">
                 <div className="ct-legend-item">
-                  <div className="ct-legend-dot" style={{ background: "#059669" }} /> Opening rank
+                  <div
+                    className="ct-legend-dot"
+                    style={{ background: "#059669" }}
+                  />{" "}
+                  Opening rank
                 </div>
                 <div className="ct-legend-item">
-                  <div className="ct-legend-dot" style={{ background: "#ea580c" }} /> Closing rank
+                  <div
+                    className="ct-legend-dot"
+                    style={{ background: "#ea580c" }}
+                  />{" "}
+                  Closing rank
                 </div>
               </div>
             </div>
@@ -617,14 +827,20 @@ const CutoffsPage = () => {
             {loading ? (
               <div className="ct-scroll">
                 <table className="ct-table">
-                  <tbody>{Array.from({ length: 7 }).map((_, i) => <SkeletonRow key={i} i={i} />)}</tbody>
+                  <tbody>
+                    {Array.from({ length: 7 }).map((_, i) => (
+                      <SkeletonRow key={i} i={i} />
+                    ))}
+                  </tbody>
                 </table>
               </div>
             ) : sorted.length === 0 ? (
               <div className="ct-empty">
                 <span className="ct-empty-icon">🔍</span>
                 <div className="ct-empty-title">No cutoff data found</div>
-                <div className="ct-empty-sub">Try adjusting your filter combinations</div>
+                <div className="ct-empty-sub">
+                  Try adjusting your filter combinations
+                </div>
               </div>
             ) : (
               <div className="ct-scroll">
@@ -648,12 +864,21 @@ const CutoffsPage = () => {
                       <tr
                         className="ct-tr"
                         key={i}
-                        style={{ animationDelay: `${Math.min(i, 14) * 0.028}s` }}
+                        style={{
+                          animationDelay: `${Math.min(i, 14) * 0.028}s`,
+                        }}
                       >
                         {/* Exam */}
                         <td className="ct-td">
-                          <span className={`ct-badge-exam ${c.exam === "GATE" ? "ct-gate" : "ct-pgcet"}`}>
-                            {c.exam === "GATE" ? "⚡" : "📘"} {c.exam}
+                          <span
+                            className={`ct-badge-exam ${
+                              c.exam.examCode === "GATE"
+                                ? "ct-gate"
+                                : "ct-pgcet"
+                            }`}
+                          >
+                            {c.exam.examCode === "GATE" ? "⚡" : "📘"}{" "}
+                            {c.exam.examCode}
                           </span>
                         </td>
                         {/* Year */}
@@ -675,25 +900,33 @@ const CutoffsPage = () => {
                         {/* Open rank */}
                         <td className="ct-td" style={{ textAlign: "right" }}>
                           <span className="ct-rank ct-rank-open">
-                            {c.startRank != null ? c.startRank.toLocaleString() : "–"}
+                            {c.startRank != null
+                              ? c.startRank.toLocaleString()
+                              : "–"}
                           </span>
                         </td>
                         {/* Close rank */}
                         <td className="ct-td" style={{ textAlign: "right" }}>
                           <span className="ct-rank ct-rank-close">
-                            {c.endRank != null ? c.endRank.toLocaleString() : "–"}
+                            {c.endRank != null
+                              ? c.endRank.toLocaleString()
+                              : "–"}
                           </span>
                         </td>
                         {/* Open %ile */}
                         <td className="ct-td" style={{ textAlign: "right" }}>
                           <span className="ct-pct">
-                            {c.startPercentile != null ? c.startPercentile.toFixed(1) : "–"}
+                            {c.startPercentile != null
+                              ? c.startPercentile.toFixed(1)
+                              : "–"}
                           </span>
                         </td>
                         {/* Close %ile */}
                         <td className="ct-td" style={{ textAlign: "right" }}>
                           <span className="ct-pct">
-                            {c.endPercentile != null ? c.endPercentile.toFixed(1) : "–"}
+                            {c.endPercentile != null
+                              ? c.endPercentile.toFixed(1)
+                              : "–"}
                           </span>
                         </td>
                         {/* Competition bar */}
@@ -707,7 +940,6 @@ const CutoffsPage = () => {
               </div>
             )}
           </div>
-
         </div>
       </div>
     </div>

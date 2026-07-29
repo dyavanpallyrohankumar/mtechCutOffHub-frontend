@@ -4,7 +4,6 @@ const ContactPage = () => {
   return (
     <div className="min-h-screen py-16 px-4">
       <div className="container mx-auto max-w-3xl">
-
         <div className="text-center mb-12">
           <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-4">
             <Mail className="w-6 h-6 text-accent" />
@@ -23,8 +22,8 @@ const ContactPage = () => {
               General Inquiries
             </h2>
             <p>
-              For questions about cutoff data, features, or corrections,
-              please email us at:
+              For questions about cutoff data, features, or corrections, please
+              email us at:
             </p>
             <a href="mailto:serviceconnect360+mtechCutOffHub@gmail.com?subject=General Inquiry">
               <p className="mt-2 text-primary font-medium">
@@ -37,9 +36,7 @@ const ContactPage = () => {
             <h2 className="text-lg font-semibold text-foreground mb-2">
               Report Data Issue
             </h2>
-            <p>
-              If you find incorrect cutoff information, please mention:
-            </p>
+            <p>If you find incorrect cutoff information, please mention:</p>
             <ul className="list-disc ml-6 mt-2 space-y-1">
               <li>College Name</li>
               <li>Branch</li>
@@ -57,7 +54,6 @@ const ContactPage = () => {
               <span>India</span>
             </div>
           </section>
-
         </div>
       </div>
     </div>

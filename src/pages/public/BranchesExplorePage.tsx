@@ -6,71 +6,103 @@ import { branchApi, BranchSummary } from "@/api/branchApi";
 /* ---------- palettes ---------- */
 
 const BRANCH_PALETTES = [
-    { from: "#6366f1", to: "#8b5cf6", light: "rgba(99,102,241,0.10)", glow: "rgba(99,102,241,0.30)" },
-    { from: "#0ea5e9", to: "#06b6d4", light: "rgba(14,165,233,0.10)", glow: "rgba(14,165,233,0.30)" },
-    { from: "#10b981", to: "#059669", light: "rgba(16,185,129,0.10)", glow: "rgba(16,185,129,0.30)" },
-    { from: "#f59e0b", to: "#ef4444", light: "rgba(245,158,11,0.10)", glow: "rgba(245,158,11,0.30)" },
+  {
+    from: "#6366f1",
+    to: "#8b5cf6",
+    light: "rgba(99,102,241,0.10)",
+    glow: "rgba(99,102,241,0.30)",
+  },
+  {
+    from: "#0ea5e9",
+    to: "#06b6d4",
+    light: "rgba(14,165,233,0.10)",
+    glow: "rgba(14,165,233,0.30)",
+  },
+  {
+    from: "#10b981",
+    to: "#059669",
+    light: "rgba(16,185,129,0.10)",
+    glow: "rgba(16,185,129,0.30)",
+  },
+  {
+    from: "#f59e0b",
+    to: "#ef4444",
+    light: "rgba(245,158,11,0.10)",
+    glow: "rgba(245,158,11,0.30)",
+  },
 ];
 
 /* ---------- emoji helper ---------- */
 
 function branchEmoji(name: string) {
-    const n = name.toLowerCase();
+  const n = name.toLowerCase();
 
-    if (n.includes("computer") || n.includes("cse")) return "💻";
-    if (n.includes("electron") || n.includes("ece")) return "⚡";
-    if (n.includes("mechanical")) return "⚙️";
-    if (n.includes("civil")) return "🏗️";
-    if (n.includes("chemical")) return "🧪";
-    if (n.includes("data") || n.includes("ai")) return "🤖";
+  if (n.includes("computer") || n.includes("cse")) return "💻";
+  if (n.includes("electron") || n.includes("ece")) return "⚡";
+  if (n.includes("mechanical")) return "⚙️";
+  if (n.includes("civil")) return "🏗️";
+  if (n.includes("chemical")) return "🧪";
+  if (n.includes("data") || n.includes("ai")) return "🤖";
 
-    return "📚";
+  return "📚";
 }
 
 /* ---------- demo fallback ---------- */
 
 const demoBranches: BranchSummary[] = [
-    { branchName: "Computer Science Engineering", branchCode: "CSE", count: 245, colleges: [] },
-    { branchName: "Artificial Intelligence", branchCode: "AI", count: 190, colleges: [] },
-    { branchName: "Data Science", branchCode: "DS", count: 170, colleges: [] },
-    { branchName: "Electronics & Communication", branchCode: "ECE", count: 210, colleges: [] },
-    { branchName: "VLSI Design", branchCode: "VLSI", count: 98, colleges: [] },
+  {
+    branchName: "Computer Science Engineering",
+    branchCode: "CSE",
+    count: 245,
+    colleges: [],
+  },
+  {
+    branchName: "Artificial Intelligence",
+    branchCode: "AI",
+    count: 190,
+    colleges: [],
+  },
+  { branchName: "Data Science", branchCode: "DS", count: 170, colleges: [] },
+  {
+    branchName: "Electronics & Communication",
+    branchCode: "ECE",
+    count: 210,
+    colleges: [],
+  },
+  { branchName: "VLSI Design", branchCode: "VLSI", count: 98, colleges: [] },
 ];
 
 /* ---------- component ---------- */
 
 const BranchesExplorerPage = () => {
+  const [branches, setBranches] = useState<BranchSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
-    const [branches, setBranches] = useState<BranchSummary[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [search, setSearch] = useState("");
+  useEffect(() => {
+    branchApi
+      .getAllBranches()
+      .then((res) => {
+        setBranches(res.data?.length ? res.data : demoBranches);
+      })
+      .catch(() => {
+        setBranches(demoBranches);
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
-    useEffect(() => {
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase();
 
-        branchApi.getAllBranches()
-            .then((res) => {
-                setBranches(res.data?.length ? res.data : demoBranches);
-            })
-            .catch(() => {
-                setBranches(demoBranches);
-            })
-            .finally(() => setLoading(false));
+    return branches.filter(
+      (b) =>
+        !q ||
+        b.branchName.toLowerCase().includes(q) ||
+        b.branchCode.toLowerCase().includes(q),
+    );
+  }, [branches, search]);
 
-    }, []);
-
-    const filtered = useMemo(() => {
-
-        const q = search.toLowerCase();
-
-        return branches.filter((b) =>
-            !q ||
-            b.branchName.toLowerCase().includes(q) ||
-            b.branchCode.toLowerCase().includes(q)
-        );
-
-    }, [branches, search]);
-
-    const css = `
+  const css = `
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,600&display=swap');
 
 .bp-root *{box-sizing:border-box;margin:0;padding:0}
@@ -410,109 +442,100 @@ color:var(--bp-text2)
 }
 `;
 
-    return (
-        <div className="bp-root">
-            <style>{css}</style>
+  return (
+    <div className="bp-root">
+      <style>{css}</style>
 
-            <div className="bp-page">
+      <div className="bp-page">
+        <div className="bp-blob bp-blob-1" />
+        <div className="bp-blob bp-blob-2" />
+        <div className="bp-blob bp-blob-3" />
 
-                <div className="bp-blob bp-blob-1" />
-                <div className="bp-blob bp-blob-2" />
-                <div className="bp-blob bp-blob-3" />
+        <div className="bp-inner">
+          <Link to="/colleges" className="bp-back">
+            <ArrowLeft size={13} /> Back to Colleges
+          </Link>
 
-                <div className="bp-inner">
+          <div className="bp-section-head">
+            <div className="bp-section-eyebrow">Programs</div>
+            <h2 className="bp-section-title">
+              Explore <span>MTech Branches</span>
+            </h2>
+          </div>
 
-                    <Link to="/colleges" className="bp-back">
-                        <ArrowLeft size={13} /> Back to Colleges
-                    </Link>
+          {/* search */}
 
-                    <div className="bp-section-head">
-                        <div className="bp-section-eyebrow">Programs</div>
-                        <h2 className="bp-section-title">
-                            Explore <span>MTech Branches</span>
-                        </h2>
-                    </div>
+          <div className="bp-search-row">
+            <div className="bp-search-wrap">
+              <Search size={15} className="bp-search-icon" />
 
-                    {/* search */}
-
-                    <div className="bp-search-row">
-
-                        <div className="bp-search-wrap">
-                            <Search size={15} className="bp-search-icon" />
-
-                            <input
-                                className="bp-search"
-                                placeholder="Search branches..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                            />
-                        </div>
-
-                        {!loading && (
-                            <div className="bp-count-badge">
-                                {filtered.length} Branch{filtered.length !== 1 ? "es" : ""}
-                            </div>
-                        )}
-
-                    </div>
-
-                    {/* grid */}
-
-                    <div className="bp-grid">
-
-                        {filtered.map((branch, i) => {
-
-                            const p = BRANCH_PALETTES[i % BRANCH_PALETTES.length];
-
-                            return (
-                                <Link
-                                    key={branch.branchCode}
-                                    to={`/branches/${branch.branchCode}`}
-                                    className="bp-branch-card"
-                                    style={{
-                                        "--c-from": p.from,
-                                        "--c-to": p.to,
-                                        "--c-light": p.light,
-                                        "--c-glow": p.glow
-                                    } as React.CSSProperties}
-                                >
-                                    <div className="bp-card-strip" />
-                                    <div className="bp-card-blob" />
-
-                                    <div className="bp-emoji-wrap">
-                                        {branchEmoji(branch.branchName)}
-                                    </div>
-
-                                    <div className="bp-branch-name">
-                                        {branch.branchName}
-                                    </div>
-
-                                    <div className="bp-branch-code">
-                                        <Hash size={9} />
-                                        {branch.branchCode}
-                                    </div>
-
-                                    <Link
-                                        to={`/branches/${branch.branchCode}`}
-                                        className="bp-cutoff-btn"
-                                    >
-                                        <span>View {branch.count} Colleges</span>
-
-                                        <div className="bp-cutoff-btn-arrow">
-                                            <ArrowRight size={13} />
-                                        </div>
-                                    </Link>
-                                </Link>
-                            );
-
-                        })}
-
-                    </div>
-
-                </div>
+              <input
+                className="bp-search"
+                placeholder="Search branches..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
             </div>
+
+            {!loading && (
+              <div className="bp-count-badge">
+                {filtered.length} Branch{filtered.length !== 1 ? "es" : ""}
+              </div>
+            )}
+          </div>
+
+          {/* grid */}
+
+          <div className="bp-grid">
+            {filtered.map((branch, i) => {
+              const p = BRANCH_PALETTES[i % BRANCH_PALETTES.length];
+
+              return (
+                <Link
+                  key={branch.branchCode}
+                  to={`/branches/${branch.branchCode}`}
+                  className="bp-branch-card"
+                  style={
+                    {
+                      "--c-from": p.from,
+                      "--c-to": p.to,
+                      "--c-light": p.light,
+                      "--c-glow": p.glow,
+                    } as React.CSSProperties
+                  }
+                >
+                  <div className="bp-card-strip" />
+                  <div className="bp-card-blob" />
+
+                  <div className="bp-emoji-wrap">
+                    {branchEmoji(branch.branchName)}
+                  </div>
+
+                  <div className="bp-branch-name">{branch.branchName}</div>
+
+                  <div className="bp-branch-code">
+                    <Hash size={9} />
+                    {branch.branchCode}
+                  </div>
+
+                  <Link
+                    to={`/branches/${branch.branchCode}`}
+                    className="bp-cutoff-btn"
+                  >
+                    <span>View {branch.count} Colleges</span>
+
+                    <div className="bp-cutoff-btn-arrow">
+                      <ArrowRight size={13} />
+                    </div>
+                  </Link>
+                </Link>
+              );
+            })}
+          </div>
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default BranchesExplorerPage;

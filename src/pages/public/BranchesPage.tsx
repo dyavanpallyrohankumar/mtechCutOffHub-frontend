@@ -1,17 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowRight, ArrowLeft, MapPin, Award, BookOpen, Hash } from "lucide-react";
-import { cutoffApi, Branch } from "@/api/cutoffApi";
+import { ArrowRight, ArrowLeft, Award, Hash } from "lucide-react";
+import type { CollegeDetails } from "@/types/college";
 import GoogleAd from "@/components/GoogleAd";
-
-interface CollegeDetails {
-  collegeName: string;
-  collegeAddress: string;
-  collegeCode: string;
-  universityName: string;
-  collegeType: string;
-  branches: Branch[];
-}
+import { collegeApi } from "@/api/collegeApi";
 
 const BRANCH_PALETTES = [
   { from: "#6366f1", to: "#8b5cf6", light: "rgba(99,102,241,0.10)", glow: "rgba(99,102,241,0.30)" },
@@ -24,7 +16,7 @@ const BRANCH_PALETTES = [
   { from: "#a855f7", to: "#ec4899", light: "rgba(168,85,247,0.10)", glow: "rgba(168,85,247,0.30)" },
 ];
 
-function branchEmoji(name: string): string {
+function programEmoji(name: string): string {
   const n = name.toLowerCase();
   if (n.includes("computer") || n.includes("cse") || n.includes("software")) return "💻";
   if (n.includes("electron") || n.includes("ece") || n.includes("vlsi")) return "⚡";
@@ -67,66 +59,77 @@ const TYPE_STYLE: Record<string, { bg: string; color: string }> = {
 };
 
 const BranchesPage = () => {
-  const { collegeId } = useParams();
+  const { examCode, collegeCode } = useParams();
   const [college, setCollege] = useState<CollegeDetails | null>(null);
-  const [branches, setBranches] = useState<Branch[]>([]);
+  const programs = college?.programs ?? [];
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
 
-  const demoBranches: Branch[] = [
-    { id: 1, branchName: "Computer Science & Engineering", branchCode: "CS", collegeProgramCode: "CS101" },
-    { id: 2, branchName: "Artificial Intelligence & ML", branchCode: "AI", collegeProgramCode: "AI101" },
-    { id: 3, branchName: "Data Science", branchCode: "DS", collegeProgramCode: "DS101" },
-    { id: 4, branchName: "Electronics & Communication", branchCode: "EC", collegeProgramCode: "EC101" },
-    { id: 5, branchName: "VLSI Design", branchCode: "VL", collegeProgramCode: "VL101" },
-    { id: 6, branchName: "Structural Engineering", branchCode: "SE", collegeProgramCode: "SE101" },];
+
+  // const demoBranches: Branch[] = [
+  //   { id: 1, branchName: "Computer Science & Engineering", branchCode: "CS", collegeProgramCode: "CS101" },
+  //   { id: 2, branchName: "Artificial Intelligence & ML", branchCode: "AI", collegeProgramCode: "AI101" },
+  //   { id: 3, branchName: "Data Science", branchCode: "DS", collegeProgramCode: "DS101" },
+  //   { id: 4, branchName: "Electronics & Communication", branchCode: "EC", collegeProgramCode: "EC101" },
+  //   { id: 5, branchName: "VLSI Design", branchCode: "VL", collegeProgramCode: "VL101" },
+  //   { id: 6, branchName: "Structural Engineering", branchCode: "SE", collegeProgramCode: "SE101" },];
 
 
-  const demoCollege: CollegeDetails = {
-    collegeName: "Demo Engineering College",
-    collegeAddress: "Bengaluru",
-    collegeCode: "DEMO01",
-    universityName: "Demo University",
-    collegeType: "Private",
-    branches: demoBranches,
-  };
+  // const demoCollege: CollegeDetails = {
+  //   collegeName: "Demo Engineering College",
+  //   collegeAddress: "Bengaluru",
+  //   collegeCode: "DEMO01",
+  //   universityName: "Demo University",
+  //   collegeType: "Private",
+  //   branches: demoBranches,
+  // };
   useEffect(() => {
-    if (!collegeId) return;
+    if (!examCode || !collegeCode) return;
 
     let cancelled = false;
-    setLoading(true);
 
-    cutoffApi.getBranches(String(collegeId))
+    setLoading(true);
+    setCollege(null);
+
+    collegeApi
+      .getCollegeDetails(examCode, collegeCode)
       .then((res) => {
         if (cancelled) return;
 
-        const data: CollegeDetails = res.data;
-
-        setCollege(data);
-        setBranches(data.branches?.length ? data.branches : demoBranches);
+        setCollege(res.data);
       })
-      .catch(() => {
+      .catch((err) => {
         if (cancelled) return;
-        setCollege(demoCollege);
-        setBranches(demoBranches);
-        console.warn("Branches API failed — using demo branches");
 
+        console.error("Failed to load college details:", err);
+        setCollege(null);
       })
       .finally(() => {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       });
 
     return () => {
       cancelled = true;
     };
-  }, [collegeId]);
+  }, [examCode, collegeCode]);
 
-  const filtered = branches.filter((b) =>
-    !search ||
-    b.branchName.toLowerCase().includes(search.toLowerCase()) ||
-    b.collegeProgramCode.toLowerCase().includes(search.toLowerCase())
+  const filtered = programs.filter(
+    (p) =>
+      !search ||
+      p.courseName
+        .toLowerCase()
+        .includes(search.toLowerCase()) ||
+      p.courseCode
+        .toLowerCase()
+        .includes(search.toLowerCase()) ||
+      p.collegeProgramCode
+        .toLowerCase()
+        .includes(search.toLowerCase())
   );
+
 
   const typeStyle = college ? (TYPE_STYLE[college.collegeType] ?? { bg: "rgba(148,163,184,0.15)", color: "#94a3b8" }) : null;
 
@@ -175,13 +178,13 @@ const BranchesPage = () => {
     .bp-search:focus{border-color:#8b5cf6;box-shadow:0 0 0 3px rgba(139,92,246,0.15)}
     .bp-count-badge{padding:8px 16px;border-radius:12px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:0.8rem;font-weight:700;box-shadow:0 4px 14px rgba(99,102,241,0.3);white-space:nowrap}
     .bp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.25rem}
-    .bp-branch-card{border-radius:20px;padding:1.5rem;border:1.5px solid var(--bp-border);background:var(--bp-card);display:flex;flex-direction:column;position:relative;overflow:hidden;transition:transform 0.28s var(--bp-ease),box-shadow 0.28s,border-color 0.2s;animation:bp-fadeUp 0.45s ease both;cursor:default}
-    .bp-branch-card:hover{transform:translateY(-6px) scale(1.01)}
+    .bp-program-card{border-radius:20px;padding:1.5rem;border:1.5px solid var(--bp-border);background:var(--bp-card);display:flex;flex-direction:column;position:relative;overflow:hidden;transition:transform 0.28s var(--bp-ease),box-shadow 0.28s,border-color 0.2s;animation:bp-fadeUp 0.45s ease both;cursor:default}
+    .bp-program-card:hover{transform:translateY(-6px) scale(1.01)}
     .bp-card-strip{position:absolute;top:0;left:0;right:0;height:5px;border-radius:20px 20px 0 0;background:linear-gradient(90deg,var(--c-from),var(--c-to))}
     .bp-card-blob{position:absolute;width:140px;height:140px;top:-30px;right:-30px;border-radius:50%;background:var(--c-light);pointer-events:none;transition:transform 0.3s}
-    .bp-branch-card:hover .bp-card-blob{transform:scale(1.3)}
+    .bp-program-card:hover .bp-card-blob{transform:scale(1.3)}
     .bp-emoji-wrap{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--c-from),var(--c-to));display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:1rem;flex-shrink:0;box-shadow:0 6px 20px var(--c-glow);transition:transform 0.3s var(--bp-ease);position:relative;z-index:1}
-    .bp-branch-card:hover .bp-emoji-wrap{transform:scale(1.12) rotate(-4deg)}
+    .bp-program-card:hover .bp-emoji-wrap{transform:scale(1.12) rotate(-4deg)}
     .bp-branch-name{font-family:'Fraunces',serif;font-size:1rem;font-weight:700;color:var(--bp-text);line-height:1.35;margin-bottom:0.4rem;position:relative;z-index:1}
     .bp-branch-code{display:inline-flex;align-items:center;gap:4px;font-size:0.7rem;font-weight:700;color:var(--c-from);background:var(--c-light);padding:3px 10px;border-radius:6px;margin-bottom:1rem;position:relative;z-index:1}
     .bp-cutoff-btn{margin-top:auto;display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-radius:12px;background:linear-gradient(135deg,var(--c-from),var(--c-to));color:#fff;text-decoration:none;font-size:0.82rem;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;box-shadow:0 4px 16px var(--c-glow);transition:transform 0.22s var(--bp-ease),box-shadow 0.22s;position:relative;z-index:1}
@@ -224,20 +227,144 @@ const BranchesPage = () => {
                 <div style={{ minWidth: 0, flex: 1 }}>
                   <h1 className="bp-college-name">{college.collegeName}</h1>
                   <div className="bp-college-meta">
-                    {typeStyle && (
-                      <span className="bp-type-chip" style={{ background: typeStyle.bg, color: typeStyle.color }}>
-                        <Award size={10} /> {college.collegeType}
-                      </span>
-                    )}
-                    <span className="bp-meta-chip"><BookOpen size={10} />{college.universityName}</span>
-                    <span className="bp-meta-chip"><MapPin size={10} />{college.collegeAddress}</span>
+
+                    <span
+                      className="bp-type-chip"
+                      style={{
+                        background: typeStyle?.bg,
+                        color: typeStyle?.color,
+                      }}
+                    >
+                      <Award size={10} />
+                      {college.collegeType}
+                    </span>
+
+                    <span className="bp-meta-chip">
+                      Established {college.establishmentYear}
+                    </span>
+
+                    <span className="bp-meta-chip">
+                      {college.coEducationType}
+                    </span>
+
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 12,
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))",
+                      gap: 12,
+                    }}
+                  >
+
+                    <div>
+                      <strong>University</strong>
+                      <br />
+                      {college.affiliatedUniversity}
+                    </div>
+
+                    <div>
+                      <strong>Address</strong>
+                      <br />
+                      {college.address}
+                    </div>
+
+                    <div>
+                      <strong>District</strong>
+                      <br />
+                      {college.district}
+                    </div>
+
+                    <div>
+                      <strong>City</strong>
+                      <br />
+                      {college.city}
+                    </div>
+
+                    <div>
+                      <strong>Hostel</strong>
+                      <br />
+                      {college.hostelAvailability}
+                    </div>
+
+                    <div>
+                      <strong>Minority</strong>
+                      <br />
+                      {college.minorityStatus}
+                    </div>
+
+                    <div>
+                      <strong>Phone</strong>
+                      <br />
+                      {college.phone || "-"}
+                    </div>
+
+                    <div>
+                      <strong>Email</strong>
+                      <br />
+                      {college.email ? (
+                        <a
+                          href={`mailto:${college.email.replace("[at]", "@")}`}
+                        >
+                          {college.email.replace("[at]", "@")}
+                        </a>
+                      ) : (
+                        "-"
+                      )}
+                    </div>
+
+
+                    <div>
+                      <strong>Website</strong>
+                      <br />
+                      {college.website ? (
+                        <a
+                          href={
+                            college.website.startsWith("http")
+                              ? college.website
+                              : `https://${college.website}`
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {college.website}
+                        </a>
+                      ) : (
+                        "-"
+                      )}
+                    </div>
+
                   </div>
                 </div>
               </div>
               <div className="bp-college-stats">
                 <div className="bp-stat"><div className="bp-stat-dot" style={{ background: "#6366f1" }} /><span className="bp-stat-text">Code:&nbsp;</span><span className="bp-stat-val">{college.collegeCode}</span></div>
-                <div className="bp-stat"><div className="bp-stat-dot" style={{ background: "#10b981" }} /><span className="bp-stat-text">Branches:&nbsp;</span><span className="bp-stat-val">{branches.length}</span></div>
-                <div className="bp-stat"><div className="bp-stat-dot" style={{ background: "#f59e0b" }} /><span className="bp-stat-text">Exam:&nbsp;</span><span className="bp-stat-val">GATE &amp; PGCET</span></div>
+                <div className="bp-stat">
+                  <div
+                    className="bp-stat-dot"
+                    style={{ background: "#10b981" }}
+                  />
+                  <span className="bp-stat-text">
+                    Programs:&nbsp;
+                  </span>
+                  <span className="bp-stat-val">
+                    {programs.length}
+                  </span>
+                </div>
+
+                <div className="bp-stat">
+                  <div
+                    className="bp-stat-dot"
+                    style={{ background: "#f59e0b" }}
+                  />
+                  <span className="bp-stat-text">
+                    State:&nbsp;
+                  </span>
+                  <span className="bp-stat-val">
+                    {college.stateName}
+                  </span>
+                </div>                <div className="bp-stat"><div className="bp-stat-dot" style={{ background: "#f59e0b" }} /><span className="bp-stat-text">Exam:&nbsp;</span><span className="bp-stat-val">GATE &amp; PGCET</span></div>
               </div>
             </div>
           )}
@@ -246,17 +373,17 @@ const BranchesPage = () => {
 
           {!loading && college && (
             <>
-              <div className="bp-section-head">
-                <div className="bp-section-eyebrow">Available Programs</div>
-                <h2 className="bp-section-title">Choose a <span>Branch</span></h2>
-              </div>
+              <div className="bp-section-eyebrow">Available Programs</div>
+              <h2 className="bp-section-title">
+                Choose a <span>Program</span>
+              </h2>
 
               <div className="bp-search-row">
                 <div className="bp-search-wrap">
                   <svg className="bp-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>
-                  <input className="bp-search" type="text" placeholder="Search branches..." value={search} onChange={(e) => setSearch(e.target.value)} />
+                  <input className="bp-search" type="text" placeholder="Search programs..." value={search} onChange={(e) => setSearch(e.target.value)} />
                 </div>
-                <div className="bp-count-badge">{filtered.length} Branch{filtered.length !== 1 ? "es" : ""}</div>
+                <div className="bp-count-badge">{filtered.length} Program{filtered.length !== 1 ? "s" : ""}</div>
               </div>
 
               {filtered.length === 0 ? (
@@ -267,21 +394,67 @@ const BranchesPage = () => {
                 </div>
               ) : (
                 <div className="bp-grid">
-                  {filtered.map((branch, i) => {
+                  {filtered.map((program, i) => {
                     const p = BRANCH_PALETTES[i % BRANCH_PALETTES.length];
                     return (
                       <div
-                        className="bp-branch-card"
-                        key={branch.id}
+                        className="bp-program-card"
+                        key={program.collegeProgramCode}
                         style={{ animationDelay: `${i * 0.045}s`, "--c-from": p.from, "--c-to": p.to, "--c-light": p.light, "--c-glow": p.glow } as React.CSSProperties}
                       >
                         <div className="bp-card-strip" />
                         <div className="bp-card-blob" />
-                        <div className="bp-emoji-wrap">{branchEmoji(branch.branchName)}</div>
-                        <div className="bp-branch-name">{branch.branchName}</div>
-                        <div className="bp-branch-code"><Hash size={9} />{branch.collegeProgramCode}</div>
-                        <Link to={`/colleges/${collegeId}/branches/${branch.collegeProgramCode}/cutoffs`} className="bp-cutoff-btn">
-                          <span>View Cutoffs</span>
+                        <div className="bp-emoji-wrap">{programEmoji(program.courseName)}</div>
+                        <div className="bp-branch-name">
+                          {program.courseName}
+                        </div>
+
+                        <div className="bp-branch-code">
+                          <Hash size={9} />
+                          {program.courseCode}
+                        </div>
+
+                        <div
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 6,
+                            marginTop: 16,
+                            fontSize: 13,
+                          }}
+                        >
+
+                          <div>
+                            Intake :
+                            <strong> {program.intake}</strong>
+                          </div>
+
+                          <div>
+                            Fee :
+                            <strong>
+                              {" "}
+                              ₹{program.fee?.toLocaleString("en-IN")}
+                            </strong>
+                          </div>
+
+                          <div>
+                            Region :
+                            <strong> {program.region}</strong>
+                          </div>
+
+                          <div>
+                            Self Finance :
+                            <strong>
+                              {" "}
+                              {program.selfFinance ? "Yes" : "No"}
+                            </strong>
+                          </div>
+
+                        </div>
+                        <Link
+                          className="bp-cutoff-btn"
+                          to={`/exams/${examCode}/colleges/${collegeCode}/programs/${program.collegeProgramCode}/cutoffs`}
+                        >                        <span>View Cutoffs</span>
                           <div className="bp-cutoff-btn-arrow"><ArrowRight size={13} /></div>
                         </Link>
                       </div>

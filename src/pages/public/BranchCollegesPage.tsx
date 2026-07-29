@@ -1,15 +1,17 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
-    ArrowRight,
-    ChevronLeft,
-    ChevronRight,
-    MapPin,
-    Hash,
-    BookOpen
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
+  MapPin,
+  Hash,
+  Users,
+  Calendar,
 } from "lucide-react";
 
-import { branchApi, BranchCollege } from "@/api/branchApi";
+import { programApi } from "@/api/programApi";
+import { CourseSummary } from "@/types/program";
 
 const PAGE_SIZE = 9;
 
@@ -560,258 +562,288 @@ const css = `
 }
 `;
 function SkeletonCard() {
-    return (
-        <div className="cp-card">
-            <div style={{ height: 4 }} />
-            <div className="cp-card-body">
-                <div style={{ display: "flex", gap: 12 }}>
-                    <div style={{ width: 50, height: 50, borderRadius: 12, background: "var(--cp-shimmer)" }} />
-                    <div style={{ flex: 1 }}>
-                        <div style={{ height: 10, width: "70%", background: "var(--cp-shimmer)", borderRadius: 6 }} />
-                    </div>
-                </div>
-            </div>
+  return (
+    <div className="cp-card">
+      <div style={{ height: 4 }} />
+      <div className="cp-card-body">
+        <div style={{ display: "flex", gap: 12 }}>
+          <div
+            style={{
+              width: 50,
+              height: 50,
+              borderRadius: 12,
+              background: "var(--cp-shimmer)",
+            }}
+          />
+          <div style={{ flex: 1 }}>
+            <div
+              style={{
+                height: 10,
+                width: "70%",
+                background: "var(--cp-shimmer)",
+                borderRadius: 6,
+              }}
+            />
+          </div>
         </div>
-    );
+      </div>
+    </div>
+  );
 }
 
 const BranchCollegesPage = () => {
-    const { branchCode } = useParams();
+  const { examCode, courseCode } = useParams();
+  const [course, setCourse] = useState<CourseSummary | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
 
-    const [colleges, setColleges] = useState<BranchCollege[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [page, setPage] = useState(0);
-    const [branchName, setBranchName] = useState("");
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }, [page]);
 
-    useEffect(() => {
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth"
-        });
-    }, [page]);
+  useEffect(() => {
+    if (!examCode || !courseCode) return;
 
-    useEffect(() => {
-        if (!branchCode) return;
+    let cancelled = false;
 
-        let cancelled = false;
+    const fetch = async () => {
+      try {
+        setLoading(true);
 
-        const fetch = async () => {
-            try {
-                setLoading(true);
+        const res = await programApi.getCourseColleges(examCode, courseCode);
 
-                const res = await branchApi.getCollegesByBranch(branchCode);
+        if (!cancelled) {
+          setCourse(res.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch colleges", err);
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
 
-                if (!cancelled) {
-                    setColleges(res.data.colleges);
-                    if (res.data.colleges.length > 0) {
-                        setBranchName(res.data.branchName);
-                    }
-                }
-            } finally {
-                if (!cancelled) setLoading(false);
-            }
-        };
+    fetch();
 
-        fetch();
+    return () => {
+      cancelled = true;
+    };
+  }, [examCode, courseCode]);
 
-        return () => {
-            cancelled = true;
-        };
-    }, [branchCode]);
+  const totalPages = Math.max(
+    1,
+    Math.ceil((course?.colleges?.length ?? 0) / PAGE_SIZE),
+  );
 
-    const totalPages = Math.max(1, Math.ceil(colleges.length / PAGE_SIZE));
+  const paginated = useMemo(() => {
+    return (course?.colleges ?? []).slice(
+      page * PAGE_SIZE,
+      (page + 1) * PAGE_SIZE,
+    );
+  }, [course, page]);
 
-    const paginated = useMemo(() => {
-        return colleges.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
-    }, [colleges, page]);
+  const pageNums = useMemo(() => {
+    if (totalPages <= 5) return Array.from({ length: totalPages }, (_, i) => i);
+    if (page < 3) return [0, 1, 2, 3, 4];
+    if (page > totalPages - 4)
+      return [
+        totalPages - 5,
+        totalPages - 4,
+        totalPages - 3,
+        totalPages - 2,
+        totalPages - 1,
+      ];
+    return [page - 2, page - 1, page, page + 1, page + 2];
+  }, [page, totalPages]);
 
-    const pageNums = useMemo(() => {
-        if (totalPages <= 5) return Array.from({ length: totalPages }, (_, i) => i);
-        if (page < 3) return [0, 1, 2, 3, 4];
-        if (page > totalPages - 4) return [totalPages - 5, totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1];
-        return [page - 2, page - 1, page, page + 1, page + 2];
-    }, [page, totalPages]);
+  return (
+    <div className="cp-root">
+      <style>{css}</style>
 
-    return (
-        <div className="cp-root">
-            <style>{css}</style>
+      <div className="cp-page">
+        {/* HEADER */}
 
-            <div className="cp-page">
+        <div className="cp-header">
+          <div className="cp-header-inner">
+            <div className="cp-breadcrumb">
+              <Link to="/">Home</Link>
+              <span className="cp-breadcrumb-sep">›</span>
 
-                {/* HEADER */}
+              <Link to="/exams">Exams</Link>
+              <span className="cp-breadcrumb-sep">›</span>
 
-                <div className="cp-header">
-                    <div className="cp-header-inner">
+              <span>{course?.courseName}</span>
+            </div>
 
-                        <div className="cp-breadcrumb">
-                            <Link to="/">Home</Link>
-                            <span className="cp-breadcrumb-sep">›</span>
-                            <Link to="/branches">Branches</Link>
-                            <span className="cp-breadcrumb-sep">›</span>
-                            <span>{branchCode}</span>
+            <h1 className="cp-title">
+              Colleges Offering <span>{course?.courseName}</span>
+            </h1>
+
+            <p className="cp-sub">{course?.collegeCount ?? 0} Colleges Found</p>
+          </div>
+        </div>
+
+        <div className="cp-inner">
+          {/* GRID */}
+
+          <div className="cp-grid">
+            {loading
+              ? Array.from({ length: 9 }).map((_, i) => (
+                  <SkeletonCard key={i} />
+                ))
+              : paginated.map((c) => {
+                  const initials = c.collegeName
+                    .split(" ")
+                    .slice(0, 2)
+                    .map((w) => w[0])
+                    .join("")
+                    .toUpperCase();
+
+                  return (
+                    <div key={c.collegeCode} className="cp-card">
+                      <div className="cp-card-top" />
+
+                      <div className="cp-card-body">
+                        {/* HEAD */}
+
+                        <div className="cp-card-head">
+                          <div
+                            className="cp-avatar"
+                            style={{
+                              background:
+                                "linear-gradient(135deg,#4F46E5,#6366f1)",
+                            }}
+                          >
+                            {initials}
+                          </div>
+
+                          <div className="cp-name-block">
+                            <div className="cp-name">{c.collegeName}</div>
+
+                            <div className="cp-code-row">
+                              <Hash size={10} />
+                              {c.collegeCode}
+                            </div>
+                          </div>
                         </div>
 
-                        <h1 className="cp-title">
-                            Colleges Offering <span>{branchCode}</span>
-                        </h1>
+                        {/* INFO */}
 
-                        <p className="cp-sub">
-                            {branchName && `${branchName} · `}
-                            {colleges.length} Colleges Found
-                        </p>
-
-                    </div>
-                </div>
-
-                <div className="cp-inner">
-
-                    {/* GRID */}
-
-                    <div className="cp-grid">
-
-                        {loading
-                            ? Array.from({ length: 9 }).map((_, i) => <SkeletonCard key={i} />)
-                            : paginated.map((c) => {
-
-                                const initials =
-                                    c.collegeName
-                                        .split(" ")
-                                        .slice(0, 2)
-                                        .map(w => w[0])
-                                        .join("")
-                                        .toUpperCase();
-
-                                return (
-                                    <div key={c.collegeCode} className="cp-card">
-
-                                        <div className="cp-card-top" />
-
-                                        <div className="cp-card-body">
-
-                                            {/* HEAD */}
-
-                                            <div className="cp-card-head">
-
-                                                <div
-                                                    className="cp-avatar"
-                                                    style={{
-                                                        background: "linear-gradient(135deg,#4F46E5,#6366f1)"
-                                                    }}
-                                                >
-                                                    {initials}
-                                                </div>
-
-                                                <div className="cp-name-block">
-                                                    <div className="cp-name">{c.collegeName}</div>
-
-                                                    <div className="cp-code-row">
-                                                        <Hash size={10} />
-                                                        {c.collegeCode}
-                                                    </div>
-                                                </div>
-
-                                            </div>
-
-                                            {/* INFO */}
-
-                                            <div className="cp-info-list">
-
-                                                <div className="cp-info-row">
-                                                    <div className="cp-info-icon">
-                                                        <BookOpen size={13} />
-                                                    </div>
-
-                                                    <div className="cp-info-content">
-                                                        <div className="cp-info-label">University</div>
-                                                        <div className="cp-info-value">
-                                                            {c.universityName}
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div className="cp-info-row">
-                                                    <div className="cp-info-icon">
-                                                        <MapPin size={13} />
-                                                    </div>
-
-                                                    <div className="cp-info-content">
-                                                        <div className="cp-info-label">Address</div>
-                                                        <div className="cp-info-value">
-                                                            {c.collegeAddress}
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                            </div>
-
-                                        </div>
-
-                                        {/* FOOTER */}
-
-                                        <div className="cp-card-footer">
-                                            <Link
-                                                to={`/colleges/${c.collegeCode}/branches`}
-                                                className="cp-btn"
-                                            >
-                                                <span>View Branches</span>
-
-                                                <span className="cp-btn-icon">
-                                                    <ArrowRight size={13} />
-                                                </span>
-                                            </Link>
-                                        </div>
-
-                                    </div>
-                                );
-                            })}
-                    </div>
-
-                    {/* PAGINATION */}
-
-                    {!loading && totalPages > 1 && (
-                        <div className="cp-pagination-wrap">
-
-                            <div className="cp-pagination">
-
-                                <button
-                                    className="cp-pg"
-                                    disabled={page === 0}
-                                    onClick={() => setPage(page - 1)}
-                                >
-                                    <ChevronLeft size={15} />
-                                </button>
-
-                                {pageNums.map((n) => (
-                                    <button
-                                        key={n}
-                                        className={`cp-pg ${page === n ? "active" : ""}`}
-                                        onClick={() => setPage(n)}
-                                    >
-                                        {n + 1}
-                                    </button>
-                                ))}
-
-                                <button
-                                    className="cp-pg"
-                                    disabled={page >= totalPages - 1}
-                                    onClick={() => setPage(page + 1)}
-                                >
-                                    <ChevronRight size={15} />
-                                </button>
-
+                        <div className="cp-info-list">
+                          <div className="cp-info-row">
+                            <div className="cp-info-icon">
+                              <MapPin size={13} />
                             </div>
 
-                            <span className="cp-pg-info">
-                                Page {page + 1} of {totalPages}
-                            </span>
+                            <div className="cp-info-content">
+                              <div className="cp-info-label">District</div>
+                              <div className="cp-info-value">{c.district}</div>
+                            </div>
+                          </div>
 
+                          <div className="cp-info-row">
+                            <div className="cp-info-icon">
+                              <MapPin size={13} />
+                            </div>
+
+                            <div className="cp-info-content">
+                              <div className="cp-info-label">Address</div>
+                              <div className="cp-info-value">{c.address}</div>
+                            </div>
+                          </div>
+
+                          <div className="cp-info-row">
+                            <div className="cp-info-icon">
+                              <Calendar size={13} />
+                            </div>
+
+                            <div className="cp-info-content">
+                              <div className="cp-info-label">Established</div>
+                              <div className="cp-info-value">
+                                {c.establishmentYear}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="cp-info-row">
+                            <div className="cp-info-icon">
+                              <Users size={13} />
+                            </div>
+
+                            <div className="cp-info-content">
+                              <div className="cp-info-label">Co-Education</div>
+                              <div className="cp-info-value">
+                                {c.coEducationType}
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                    )}
+                      </div>
 
-                </div>
+                      {/* FOOTER */}
+
+                      <div className="cp-card-footer">
+                        <Link
+                          to={`/colleges/${c.collegeCode}/branches`}
+                          className="cp-btn"
+                        >
+                          <span>View Branches</span>
+
+                          <span className="cp-btn-icon">
+                            <ArrowRight size={13} />
+                          </span>
+                        </Link>
+                      </div>
+                    </div>
+                  );
+                })}
+          </div>
+
+          {/* PAGINATION */}
+
+          {!loading && totalPages > 1 && (
+            <div className="cp-pagination-wrap">
+              <div className="cp-pagination">
+                <button
+                  className="cp-pg"
+                  disabled={page === 0}
+                  onClick={() => setPage(page - 1)}
+                >
+                  <ChevronLeft size={15} />
+                </button>
+
+                {pageNums.map((n) => (
+                  <button
+                    key={n}
+                    className={`cp-pg ${page === n ? "active" : ""}`}
+                    onClick={() => setPage(n)}
+                  >
+                    {n + 1}
+                  </button>
+                ))}
+
+                <button
+                  className="cp-pg"
+                  disabled={page >= totalPages - 1}
+                  onClick={() => setPage(page + 1)}
+                >
+                  <ChevronRight size={15} />
+                </button>
+              </div>
+
+              <span className="cp-pg-info">
+                Page {page + 1} of {totalPages}
+              </span>
             </div>
+          )}
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default BranchCollegesPage;

@@ -5,63 +5,84 @@ import {
   ArrowRight,
   ChevronLeft,
   ChevronRight,
-  GraduationCap,
-  Landmark,
-  FlaskConical,
   MapPin,
-  Building2,
   Hash,
-  BookOpen,
+  Users,
+  Calendar,
 } from "lucide-react";
-
-import { collegeApi, College } from "@/api/collegeApi";
-
+import { collegeApi } from "@/api/collegeApi";
+import { CollegeList } from "@/types/college";
 const PAGE_SIZE = 9;
 
 /* -------------------------------------------------- */
 /* College Type Styles — using design system palette  */
 /* -------------------------------------------------- */
 
-const TYPE_STYLE: Record<string, { bg: string; color: string; border: string; icon: React.ReactNode }> = {
-  Government: {
+const CO_ED_STYLE: Record<
+  string,
+  { bg: string; color: string; border: string; gradient: string }
+> = {
+  BOTH: {
     bg: "rgba(16,185,129,0.10)",
     color: "#065f46",
     border: "rgba(16,185,129,0.25)",
-    icon: <Landmark size={11} />,
+    gradient: "linear-gradient(135deg,#10b981,#059669)",
   },
-  "Private Aided": {
-    bg: "rgba(79,70,229,0.10)",
-    color: "#3730A3",
-    border: "rgba(79,70,229,0.25)",
-    icon: <GraduationCap size={11} />,
+  BOYS: {
+    bg: "rgba(59,130,246,0.10)",
+    color: "#1d4ed8",
+    border: "rgba(59,130,246,0.25)",
+    gradient: "linear-gradient(135deg,#3b82f6,#2563eb)",
   },
-  Private: {
-    bg: "rgba(245,158,11,0.10)",
-    color: "#92400e",
-    border: "rgba(245,158,11,0.25)",
-    icon: <FlaskConical size={11} />,
+  GIRLS: {
+    bg: "rgba(236,72,153,0.10)",
+    color: "#be185d",
+    border: "rgba(236,72,153,0.25)",
+    gradient: "linear-gradient(135deg,#ec4899,#db2777)",
+  },
+  NA: {
+    bg: "rgba(148,163,184,0.10)",
+    color: "#475569",
+    border: "rgba(148,163,184,0.25)",
+    gradient: "linear-gradient(135deg,#94a3b8,#64748b)",
   },
 };
 
-function typeMeta(type: string) {
-  return (
-    TYPE_STYLE[type] ?? {
-      bg: "rgba(148,163,184,0.10)",
-      color: "#475569",
-      border: "rgba(148,163,184,0.25)",
-      icon: <Building2 size={11} />,
-    }
-  );
-}
+function getCollegeEra(year: number) {
+  if (year < 1970)
+    return {
+      label: "Legacy",
+      gradient: "linear-gradient(135deg,#f59e0b,#d97706)",
+      bg: "rgba(245,158,11,.10)",
+      color: "#92400e",
+      border: "rgba(245,158,11,.25)",
+    };
 
-/* Avatar gradient by type */
-const TYPE_AVATAR: Record<string, string> = {
-  Government: "linear-gradient(135deg,#10b981,#059669)",
-  "Private Aided": "linear-gradient(135deg,#4F46E5,#6366f1)",
-  Private: "linear-gradient(135deg,#f59e0b,#f97316)",
-};
-function avatarGrad(type: string) {
-  return TYPE_AVATAR[type] ?? "linear-gradient(135deg,#94a3b8,#64748b)";
+  if (year < 1995)
+    return {
+      label: "Established",
+      gradient: "linear-gradient(135deg,#10b981,#059669)",
+      bg: "rgba(16,185,129,.10)",
+      color: "#065f46",
+      border: "rgba(16,185,129,.25)",
+    };
+
+  if (year < 2010)
+    return {
+      label: "Modern",
+      gradient: "linear-gradient(135deg,#4f46e5,#6366f1)",
+      bg: "rgba(79,70,229,.10)",
+      color: "#3730A3",
+      border: "rgba(79,70,229,.25)",
+    };
+
+  return {
+    label: "New",
+    gradient: "linear-gradient(135deg,#06b6d4,#0891b2)",
+    bg: "rgba(6,182,212,.10)",
+    color: "#155e75",
+    border: "rgba(6,182,212,.25)",
+  };
 }
 
 /* -------------------------------------------------- */
@@ -72,16 +93,55 @@ function SkeletonCard() {
   return (
     <div className="cp-card">
       <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
-        <div style={{ width: 52, height: 52, borderRadius: 12, background: "var(--cp-shimmer)", flexShrink: 0 }} />
+        <div
+          style={{
+            width: 52,
+            height: 52,
+            borderRadius: 12,
+            background: "var(--cp-shimmer)",
+            flexShrink: 0,
+          }}
+        />
         <div style={{ flex: 1 }}>
-          <div style={{ height: 10, width: "80%", borderRadius: 6, background: "var(--cp-shimmer)", marginBottom: 8 }} />
-          <div style={{ height: 8, width: "50%", borderRadius: 6, background: "var(--cp-shimmer)" }} />
+          <div
+            style={{
+              height: 10,
+              width: "80%",
+              borderRadius: 6,
+              background: "var(--cp-shimmer)",
+              marginBottom: 8,
+            }}
+          />
+          <div
+            style={{
+              height: 8,
+              width: "50%",
+              borderRadius: 6,
+              background: "var(--cp-shimmer)",
+            }}
+          />
         </div>
       </div>
       {[90, 70, 60].map((w, i) => (
-        <div key={i} style={{ height: 8, width: `${w}%`, borderRadius: 6, background: "var(--cp-shimmer)", marginBottom: 9 }} />
+        <div
+          key={i}
+          style={{
+            height: 8,
+            width: `${w}%`,
+            borderRadius: 6,
+            background: "var(--cp-shimmer)",
+            marginBottom: 9,
+          }}
+        />
       ))}
-      <div style={{ height: 38, borderRadius: 10, background: "var(--cp-shimmer)", marginTop: 16 }} />
+      <div
+        style={{
+          height: 38,
+          borderRadius: 10,
+          background: "var(--cp-shimmer)",
+          marginTop: 16,
+        }}
+      />
     </div>
   );
 }
@@ -89,10 +149,20 @@ function SkeletonCard() {
 /* -------------------------------------------------- */
 /* Stat Badge in header                               */
 /* -------------------------------------------------- */
-function StatChip({ label, value, color }: { label: string; value: number | string; color: string }) {
+function StatChip({
+  label,
+  value,
+  color,
+}: {
+  label: string;
+  value: number | string;
+  color: string;
+}) {
   return (
     <div className="cp-stat-chip" style={{ borderColor: `${color}25` }}>
-      <span className="cp-stat-val" style={{ color }}>{value}</span>
+      <span className="cp-stat-val" style={{ color }}>
+        {value}
+      </span>
       <span className="cp-stat-lbl">{label}</span>
     </div>
   );
@@ -103,102 +173,11 @@ function StatChip({ label, value, color }: { label: string; value: number | stri
 /* -------------------------------------------------- */
 
 const CollegesPage = () => {
-  const [allColleges, setAllColleges] = useState<College[]>([]);
+  const [allColleges, setAllColleges] = useState<CollegeList[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [activeType, setActiveType] = useState("All");
   const [page, setPage] = useState(0);
-
-  const DEMO: College[] = [
-    { id: 1, collegeCode: "E001", collegeName: "University Visvesvaraya College of Engineering", collegeType: "Government", universityName: "Bangalore University", collegeAddress: "Bengaluru" },
-    { id: 2, collegeCode: "E002", collegeName: "BMS College of Engineering", collegeType: "Private Aided", universityName: "VTU", collegeAddress: "Bengaluru" },
-    { id: 3, collegeCode: "E003", collegeName: "RV College of Engineering", collegeType: "Private Aided", universityName: "VTU", collegeAddress: "Bengaluru" },
-  ];
-
-
-  useEffect(() => { setPage(0); }, [search, activeType]);
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [page]);
-
-  // useEffect(() => {
-  //   (async () => {
-  //     try {
-  //       const res = await collegeApi.getAll({ page: 0, size: 10000 });
-  //       setAllColleges(res.data.content);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   })();
-  // }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const fetchColleges = async () => {
-      try {
-        setLoading(true);
-
-        const res = await collegeApi.getAll({ page: 0, size: 10000 });
-
-        if (!cancelled) {
-          setAllColleges(res.data.content);
-        }
-      } catch (err) {
-        console.warn("API failed — using demo data");
-
-        if (!cancelled) {
-          setAllColleges(DEMO);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchColleges();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const types = useMemo(() => {
-    const s = new Set(allColleges.map((c) => c.collegeType));
-    return ["All", ...Array.from(s)];
-  }, [allColleges]);
-
-  const typeCounts = useMemo(() => {
-    const m: Record<string, number> = {};
-    allColleges.forEach(c => { m[c.collegeType] = (m[c.collegeType] ?? 0) + 1; });
-    return m;
-  }, [allColleges]);
-
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase();
-    return allColleges.filter((c) => {
-      const matchSearch =
-        !q ||
-        c.collegeName.toLowerCase().includes(q) ||
-        c.collegeAddress.toLowerCase().includes(q) ||
-        c.universityName.toLowerCase().includes(q) ||
-        c.collegeCode.toLowerCase().includes(q);
-      const matchType = activeType === "All" || c.collegeType === activeType;
-      return matchSearch && matchType;
-    });
-  }, [allColleges, search, activeType]);
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const paginated = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
-
-  const pageNums = useMemo(() => {
-    if (totalPages <= 5) return Array.from({ length: totalPages }, (_, i) => i);
-    if (page < 3) return [0, 1, 2, 3, 4];
-    if (page > totalPages - 4) return [totalPages - 5, totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1];
-    return [page - 2, page - 1, page, page + 1, page + 2];
-  }, [page, totalPages]);
+  const examCode = sessionStorage.getItem("examCode");
 
   /* ---------------------------------------------------------------- */
   /* CSS                                                               */
@@ -751,12 +730,99 @@ const CollegesPage = () => {
 }
 `;
 
+  // const DEMO: College[] = [
+  //   { id: 1, collegeCode: "E001", collegeName: "University Visvesvaraya College of Engineering", collegeType: "Government", universityName: "Bangalore University", collegeAddress: "Bengaluru" },
+  //   { id: 2, collegeCode: "E002", collegeName: "BMS College of Engineering", collegeType: "Private Aided", universityName: "VTU", collegeAddress: "Bengaluru" },
+  //   { id: 3, collegeCode: "E003", collegeName: "RV College of Engineering", collegeType: "Private Aided", universityName: "VTU", collegeAddress: "Bengaluru" },
+  // ];
+
+  useEffect(() => {
+    setPage(0);
+  }, [search]);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [page]);
+
+  // useEffect(() => {
+  //   (async () => {
+  //     try {
+  //       const res = await collegeApi.getAll({ page: 0, size: 10000 });
+  //       setAllColleges(res.data.content);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   })();
+  // }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchColleges = async () => {
+      try {
+        setLoading(true);
+
+        if (!examCode) return;
+
+        const res = await collegeApi.getAll(examCode, {
+          page: 0,
+          size: 10000,
+        });
+
+        if (!cancelled) {
+          setAllColleges(res.data.content);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchColleges();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [examCode]);
+
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase();
+    return allColleges.filter((c) => {
+      const matchSearch =
+        !q ||
+        c.collegeName.toLowerCase().includes(q) ||
+        c.collegeCode.toLowerCase().includes(q) ||
+        c.district.toLowerCase().includes(q);
+      // const matchType = activeType === "All" || c.collegeType === activeType;
+      return matchSearch;
+    });
+  }, [allColleges, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paginated = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
+  const pageNums = useMemo(() => {
+    if (totalPages <= 5) return Array.from({ length: totalPages }, (_, i) => i);
+    if (page < 3) return [0, 1, 2, 3, 4];
+    if (page > totalPages - 4)
+      return [
+        totalPages - 5,
+        totalPages - 4,
+        totalPages - 3,
+        totalPages - 2,
+        totalPages - 1,
+      ];
+    return [page - 2, page - 1, page, page + 1, page + 2];
+  }, [page, totalPages]);
+
   return (
     <div className="cp-root">
       <style>{css}</style>
 
       <div className="cp-page">
-
         {/* ── Header ── */}
         <div className="cp-header">
           <div className="cp-header-inner">
@@ -770,35 +836,53 @@ const CollegesPage = () => {
               Find Your <span>Dream College</span>
             </h1>
             <p className="cp-sub">
-              Browse {allColleges.length}+ Telangana engineering colleges — filter by type, search by name or location.
+              Browse {allColleges.length} colleges available for this
+              examination.{" "}
             </p>
 
             <div className="cp-stats-row">
-              <StatChip label="Colleges" value={allColleges.length} color="#4F46E5" />
-              <StatChip label="Government" value={typeCounts["Government"] ?? 0} color="#10B981" />
+              {/* <StatChip label="Colleges" value={allColleges.length} color="#4F46E5" /> */}
+              {/* <StatChip label="Government" value={typeCounts["Government"] ?? 0} color="#10B981" />
               <StatChip label="Pvt Aided" value={typeCounts["Private Aided"] ?? 0} color="#4F46E5" />
-              <StatChip label="Private" value={typeCounts["Private"] ?? 0} color="#F59E0B" />
+              <StatChip label="Private" value={typeCounts["Private"] ?? 0} color="#F59E0B" /> */}
+              <StatChip
+                label="Colleges"
+                value={allColleges.length}
+                color="#4F46E5"
+              />
+
+              <StatChip
+                label="Districts"
+                value={new Set(allColleges.map((c) => c.district)).size}
+                color="#10B981"
+              />
               {filtered.length !== allColleges.length && (
-                <StatChip label="Filtered" value={filtered.length} color="#06B6D4" />
+                <StatChip
+                  label="Filtered"
+                  value={filtered.length}
+                  color="#06B6D4"
+                />
               )}
             </div>
           </div>
         </div>
 
         <div className="cp-inner">
-
           {/* ── Toolbar ── */}
           <div className="cp-toolbar">
             <div className="cp-search-wrap">
               <Search size={15} className="cp-search-icon" />
               <input
                 className="cp-search"
-                placeholder="Search by name, code, university or city…"
+                placeholder="Search by college name, code or district..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
               {search && (
-                <button className="cp-search-clear" onClick={() => setSearch("")}>
+                <button
+                  className="cp-search-clear"
+                  onClick={() => setSearch("")}
+                >
                   ✕
                 </button>
               )}
@@ -811,7 +895,7 @@ const CollegesPage = () => {
           </div>
 
           {/* ── Filters ── */}
-          <div className="cp-filters">
+          {/* <div className="cp-filters">
             {types.map((t) => (
               <button
                 key={t}
@@ -824,99 +908,142 @@ const CollegesPage = () => {
                 </span>
               </button>
             ))}
-          </div>
+          </div> */}
 
           {/* ── Grid ── */}
           <div className="cp-grid">
-            {loading
-              ? Array.from({ length: 9 }).map((_, i) => <SkeletonCard key={i} />)
-              : paginated.length === 0
-                ? (
-                  <div className="cp-empty">
-                    <div className="cp-empty-icon">🔍</div>
-                    <div className="cp-empty-title">No colleges found</div>
-                    <div className="cp-empty-sub">Try a different search term or filter.</div>
-                  </div>
-                )
-                : paginated.map((c) => {
-                  const meta = typeMeta(c.collegeType);
-                  const grad = avatarGrad(c.collegeType);
-                  const initials = c.collegeName
+            {loading ? (
+              Array.from({ length: 9 }).map((_, i) => <SkeletonCard key={i} />)
+            ) : paginated.length === 0 ? (
+              <div className="cp-empty">
+                <div className="cp-empty-icon">🔍</div>
+                <div className="cp-empty-title">No colleges found</div>
+                <div className="cp-empty-sub">
+                  Try a different search term or filter.
+                </div>
+              </div>
+            ) : (
+              paginated.map((c) => {
+                const era = getCollegeEra(c.establishmentYear);
+
+                const coEd = CO_ED_STYLE[c.coEducationType] ?? CO_ED_STYLE.NA;
+                const initials =
+                  c.collegeName
                     .split(" ")
-                    .filter(w => w.length > 2)
+                    .filter((w) => w.length > 2)
                     .slice(0, 2)
                     .map((w) => w[0])
                     .join("")
                     .toUpperCase() || c.collegeName.slice(0, 2).toUpperCase();
 
-                  return (
-                    <div key={c.id} className="cp-card">
-                      <div className="cp-card-top" />
-
-                      <div className="cp-card-body">
-                        {/* Head */}
-                        <div className="cp-card-head">
-                          <div className="cp-avatar" style={{ background: grad }}>
-                            {initials}
-                          </div>
-                          <div className="cp-name-block">
-                            <div className="cp-name">{c.collegeName}</div>
-                            <div className="cp-code-row">
-                              <Hash size={10} />
-                              {c.collegeCode}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Type badge */}
+                return (
+                  <div key={c.collegeCode} className="cp-card">
+                    {" "}
+                    <div className="cp-card-top" />
+                    <div className="cp-card-body">
+                      {/* Head */}
+                      <div className="cp-card-head">
                         <div
-                          className="cp-type-badge"
-                          style={{ background: meta.bg, color: meta.color, borderColor: meta.border }}
+                          className="cp-avatar"
+                          style={{ background: era.gradient }}
                         >
-                          {meta.icon}
-                          {c.collegeType}
+                          {" "}
+                          {initials}
                         </div>
-
-                        {/* Info rows */}
-                        <div className="cp-info-list">
-                          <div className="cp-info-row">
-                            <div className="cp-info-icon">
-                              <BookOpen size={13} />
-                            </div>
-                            <div className="cp-info-content">
-                              <div className="cp-info-label">University</div>
-                              <div className="cp-info-value" title={c.universityName}>
-                                {c.universityName}
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="cp-info-row">
-                            <div className="cp-info-icon">
-                              <MapPin size={13} />
-                            </div>
-                            <div className="cp-info-content">
-                              <div className="cp-info-label">Address</div>
-                              <div className="cp-info-value" title={c.collegeAddress}>
-                                {c.collegeAddress}
-                              </div>
-                            </div>
+                        <div className="cp-name-block">
+                          <div className="cp-name">{c.collegeName}</div>
+                          <div className="cp-code-row">
+                            <Hash size={10} />
+                            {c.collegeCode}
                           </div>
                         </div>
                       </div>
 
-                      {/* Footer */}
-                      <div className="cp-card-footer">
-                        <Link to={`/colleges/${c.collegeCode}/branches`} className="cp-btn">
-                          <span>View Branches</span>
-                          <span className="cp-btn-icon">
-                            <ArrowRight size={13} />
-                          </span>
-                        </Link>
+                      {/* Type badge */}
+                      <div
+                        className="cp-type-badge"
+                        style={{
+                          background: era.bg,
+                          color: era.color,
+                          borderColor: era.border,
+                        }}
+                      >
+                        {era.label}
+                      </div>
+
+                      {/* Info rows */}
+                      <div className="cp-info-list">
+                        <div className="cp-info-row">
+                          <div className="cp-info-icon">
+                            <MapPin size={13} />
+                          </div>
+
+                          <div className="cp-info-content">
+                            <div className="cp-info-label">District</div>
+                            <div className="cp-info-value">{c.district}</div>
+                          </div>
+                        </div>
+
+                        <div className="cp-info-row">
+                          <div className="cp-info-icon">
+                            <MapPin size={13} />
+                          </div>
+
+                          <div className="cp-info-content">
+                            <div className="cp-info-label">Address</div>
+                            <div className="cp-info-value">{c.address}</div>
+                          </div>
+                        </div>
+                        <div className="cp-info-row">
+                          <div className="cp-info-icon">
+                            <Users size={13} />
+                          </div>
+
+                          <div className="cp-info-content">
+                            <div className="cp-info-label">Co-Education</div>
+
+                            <div
+                              className="cp-info-value"
+                              style={{
+                                color: coEd.color,
+                                fontWeight: 600,
+                              }}
+                            >
+                              {c.coEducationType}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="cp-info-row">
+                          <div className="cp-info-icon">
+                            <Calendar size={13} />
+                          </div>
+
+                          <div className="cp-info-content">
+                            <div className="cp-info-label">Established</div>
+
+                            <div className="cp-info-value">
+                              {c.establishmentYear}
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  );
-                })}
+                    {/* Footer */}
+                    <div className="cp-card-footer">
+                      <Link
+                        to={`/exams/${examCode}/colleges/${c.collegeCode}/branches`}
+                        className="cp-btn"
+                      >
+                        <span>View Branches</span>
+                        <span className="cp-btn-icon">
+                          <ArrowRight size={13} />
+                        </span>
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
 
           {/* ── Pagination ── */}
@@ -954,7 +1081,6 @@ const CollegesPage = () => {
               </span>
             </div>
           )}
-
         </div>
       </div>
     </div>
