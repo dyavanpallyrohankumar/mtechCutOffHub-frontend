@@ -30,9 +30,9 @@ const AdminLoginPage = lazy(() => import("./pages/admin/AdminLoginPage"));
 const OtpVerificationPage = lazy(() => import("./pages/admin/OtpVerificationPage"));
 const AdminLayout = lazy(() => import("./components/layout/AdminLayout"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
-const ManageColleges = lazy(() => import("./pages/admin/ManageColleges"));
-const ManageBranches = lazy(() => import("./pages/admin/ManageBranches"));
-const ManageAllotments = lazy(() => import("./pages/admin/ManageAllotments"));
+// const ManageColleges = lazy(() => import("./pages/admin/ManageColleges"));
+// const ManageBranches = lazy(() => import("./pages/admin/ManageBranches"));
+// const ManageAllotments = lazy(() => import("./pages/admin/ManageAllotments"));
 
 const queryClient = new QueryClient();
 
@@ -85,9 +85,9 @@ const App = () => (
               {/* Admin protected */}
               <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
                 <Route path="dashboard" element={<AdminDashboard />} />
-                <Route path="colleges" element={<ManageColleges />} />
+                {/* <Route path="colleges" element={<ManageColleges />} />
                 <Route path="branches" element={<ManageBranches />} />
-                <Route path="allotments" element={<ManageAllotments />} />
+                <Route path="allotments" element={<ManageAllotments />} /> */}
               </Route>
 
               <Route path="*" element={<NotFound />} />
