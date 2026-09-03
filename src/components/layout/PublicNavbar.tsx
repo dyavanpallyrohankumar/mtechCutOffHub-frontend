@@ -5,7 +5,7 @@ import { useTheme } from "@/hooks/useTheme"; // adjust path if needed
 
 const navLinks = [
   { label: "Home", path: "/" },
-  { label: "Colleges", path: "/colleges" },
+  { label: "Colleges", path: "/states" },
   { label: "Branches", path: "/branches" },
   { label: "Contact", path: "/contact" },
   { label: "Privacy", path: "/privacy-policy" },

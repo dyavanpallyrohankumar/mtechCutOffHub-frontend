@@ -30,6 +30,8 @@ const AdminLoginPage = lazy(() => import("./pages/admin/AdminLoginPage"));
 const OtpVerificationPage = lazy(() => import("./pages/admin/OtpVerificationPage"));
 const AdminLayout = lazy(() => import("./components/layout/AdminLayout"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminSettings = lazy(() => import("./pages/admin/AdminSettingsPage"));
+const ExcelImportPage = lazy(() => import("./pages/admin/ExcelImportPage"));
 // const ManageColleges = lazy(() => import("./pages/admin/ManageColleges"));
 // const ManageBranches = lazy(() => import("./pages/admin/ManageBranches"));
 // const ManageAllotments = lazy(() => import("./pages/admin/ManageAllotments"));
@@ -88,6 +90,9 @@ const App = () => (
                 {/* <Route path="colleges" element={<ManageColleges />} />
                 <Route path="branches" element={<ManageBranches />} />
                 <Route path="allotments" element={<ManageAllotments />} /> */}
+                <Route path="import" element={<ExcelImportPage />}/>
+                <Route path="settings" element={<AdminSettings />} />
+              
               </Route>
 
               <Route path="*" element={<NotFound />} />
