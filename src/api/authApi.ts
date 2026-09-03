@@ -24,7 +24,7 @@ export interface LoginResponse {
 
 export interface OtpVerifyPayload {
   username: string;
-  otp: number;
+  otp: string;
 }
 
 export interface EnableTwoFactorPayload {

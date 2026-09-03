@@ -10,7 +10,9 @@ const OTP_LENGTH = 6;
 const OtpVerificationPage = () => {
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
   const [loading, setLoading] = useState(false);
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>(
+    Array(OTP_LENGTH).fill(null),
+  );
   const navigate = useNavigate();
 
   const { pendingUsername, login } = useAuth();
@@ -55,7 +57,7 @@ const OtpVerificationPage = () => {
         otp: code,
       });
 
-      login(res.data.token, pendingUsername);
+      login(res.data.token, pendingUsername, true);
 
       toast.success("Login successful!");
       navigate("/admin/dashboard");
@@ -68,7 +70,6 @@ const OtpVerificationPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-background">
-
       {/* Background Glow */}
       <div
         className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 
@@ -77,16 +78,15 @@ const OtpVerificationPage = () => {
       />
 
       <div className="relative w-full max-w-sm text-center">
-
         {/* Icon */}
-        <div className="w-14 h-14 rounded-2xl bg-accent/10 
-                        flex items-center justify-center mx-auto mb-4">
+        <div
+          className="w-14 h-14 rounded-2xl bg-accent/10 
+                        flex items-center justify-center mx-auto mb-4"
+        >
           <ShieldCheck className="w-7 h-7 text-accent" />
         </div>
 
-        <h1 className="text-2xl font-bold text-foreground mb-1">
-          Verify OTP
-        </h1>
+        <h1 className="text-2xl font-bold text-foreground mb-1">Verify OTP</h1>
 
         <p className="text-sm text-muted-foreground mb-8">
           Enter the 6-digit code sent to{" "}
@@ -100,7 +100,9 @@ const OtpVerificationPage = () => {
           {otp.map((digit, i) => (
             <input
               key={i}
-              ref={(el) => { inputRefs.current[i] = el; }}
+              ref={(el) => {
+                inputRefs.current[i] = el;
+              }}
               type="text"
               inputMode="numeric"
               maxLength={1}
