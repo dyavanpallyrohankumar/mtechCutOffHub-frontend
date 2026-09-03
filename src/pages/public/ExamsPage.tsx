@@ -120,22 +120,90 @@ const ExamPage = () => {
   const css = `
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:wght@700&display=swap');
 
+
+.ep-root {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+
+  --ep-bg: hsl(var(--background));
+  --ep-card: hsl(var(--card));
+  --ep-border: hsl(var(--border));
+  --ep-text: hsl(var(--foreground));
+  --ep-text2: hsl(var(--muted-foreground));
+  --ep-shimmer: hsl(var(--primary) / 0.08);
+}
+
+.ep-page {
+  background: var(--ep-bg);
+}
+
+.ep-title {
+  color: var(--ep-text);
+}
+
+.ep-subtitle {
+  color: var(--ep-text2);
+}
+
+.ep-search input {
+  background: var(--ep-card);
+  color: var(--ep-text);
+  border-color: var(--ep-border);
+}
+
+.ep-search input::placeholder {
+  color: var(--ep-text2);
+}
+
+.ep-search svg {
+  color: var(--ep-text2);
+}
+
+.ep-card {
+  background: var(--ep-card) !important;
+  color: var(--ep-text);
+  border-color: var(--ep-border) !important;
+}
+
+.ep-authority {
+  color: var(--ep-text2);
+}
+
+.ep-authority strong {
+  color: var(--ep-text);
+}
+
+.ep-details-button {
+  background: hsl(var(--secondary)) !important;
+  color: hsl(var(--secondary-foreground)) !important;
+}
+
+.ep-empty {
+  color: var(--ep-text2);
+}
+
+.ep-empty h2 {
+  color: var(--ep-text);
+}
+
+.ep-empty p {
+  color: var(--ep-text2);
+}
+
+/* Back button */
+.ep-back-button {
+  background: var(--ep-card) !important;
+  color: var(--ep-text) !important;
+  border-color: var(--ep-border) !important;
+}
+
+
+
 .ep-root *{
 box-sizing:border-box;
 margin:0;
 padding:0;
 }
 
-.ep-root{
-font-family:'Plus Jakarta Sans',sans-serif;
-
---ep-bg:#f6f4ff;
---ep-card:#fff;
---ep-border:rgba(99,102,241,.12);
---ep-text:#1f1b3d;
---ep-text2:#65607f;
---ep-shimmer:rgba(99,102,241,.08);
-}
 
 @keyframes epFade{
 from{
@@ -297,7 +365,7 @@ gap:1.4rem;
               gap: 8,
               marginBottom: 24,
               border: "none",
-              background: "#fff",
+              background: "var(--ep-card)",
               padding: "10px 16px",
               borderRadius: 12,
               cursor: "pointer",
@@ -337,8 +405,7 @@ gap:1.4rem;
               style={{
                 textAlign: "center",
                 padding: "80px",
-                color: "#666",
-              }}
+                color: "var(--ep-text2)"              }}
             >
               <BookOpen
                 size={60}
@@ -361,7 +428,7 @@ gap:1.4rem;
                   <div
                     key={exam.id}
                     style={{
-                      background: "white",
+                      background: "var(--ep-card)",
                       borderRadius: 24,
                       overflow: "hidden",
                       position: "relative",
@@ -415,7 +482,7 @@ gap:1.4rem;
                       <h2
                         style={{
                           fontFamily: "Fraunces",
-                          color: "#231942",
+                          color: "var(--ep-text)",
                           marginBottom: 10,
                         }}
                       >
@@ -438,8 +505,7 @@ gap:1.4rem;
 
                       <div
                         style={{
-                          color: "#666",
-                          marginBottom: 25,
+                          color: "var(--ep-text2)",                          marginBottom: 25,
                           lineHeight: 1.6,
                         }}
                       >
@@ -465,8 +531,7 @@ gap:1.4rem;
                             borderRadius: 12,
                             cursor: "pointer",
                             fontWeight: 700,
-                            background: "#f3f4f6",
-                          }}
+                            background: "hsl(var(--secondary))"                          }}
                         >
                           Details
                         </button>
