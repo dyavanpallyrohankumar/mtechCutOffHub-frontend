@@ -22,12 +22,11 @@ const ContactPage = () => {
               General Inquiries
             </h2>
             <p>
-              For questions about cutoff data, features, or corrections, please
-              email us at:
+              For questions about cutoff data, features, or corrections, please email us at:
             </p>
-            <a href="mailto:serviceconnect360+mtechCutOffHub@gmail.com?subject=General Inquiry">
+            <a href="mailto:serviceconnect360+cutOffHub@gmail.com?subject=General Inquiry">
               <p className="mt-2 text-primary font-medium">
-                serviceconnect360+mtechCutOffHub@gmail.com
+                Click here to email us
               </p>
             </a>
           </section>
