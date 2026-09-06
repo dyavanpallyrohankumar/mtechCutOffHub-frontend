@@ -14,23 +14,6 @@ import { cutoffApi } from "@/api/cutoffApi";
 import GoogleAd from "@/components/GoogleAd";
 import { CutoffData } from "@/types/cutoff";
 
-const EXAM_OPTIONS = ["All", "GATE", "PGCET"];
-const PHASE_OPTIONS = ["All", "PHASE I", "PHASE II"];
-const CATEGORY_OPTIONS = [
-  "All",
-  "GM",
-  "OC",
-  "SC",
-  "ST",
-  "OBC",
-  "BC-A",
-  "BC-B",
-  "BC-C",
-  "BC-D",
-  "BC-E",
-];
-const YEAR_OPTIONS = ["All", "2025", "2024", "2023", "2022"];
-
 /* ─── Competition tier ────────────────── */
 function tier(endRank: number) {
   if (endRank <= 500)
@@ -287,13 +270,35 @@ const CutoffsPage = () => {
   const maxRank = filtered.length
     ? Math.max(...filtered.map((c) => c.endRank))
     : 0;
+  const percentileValues = filtered
+    .map((c) => c.startPercentile)
+    .filter((v): v is number => v != null);
+
   const avgPct =
-    filtered.length && filtered.some((c) => c.startPercentile != null)
+    percentileValues.length > 0
       ? (
-          filtered.reduce((s, c) => s + (c.startPercentile ?? 0), 0) /
-          filtered.length
+          percentileValues.reduce((sum, value) => sum + value, 0) /
+          percentileValues.length
         ).toFixed(1)
       : "–";
+
+  const categoryOptions = useMemo(() => {
+    const categories = [...new Set(cutoffs.map((c) => c.category))];
+
+    return ["All", ...categories];
+  }, [cutoffs]);
+
+  const yearOptions = useMemo(() => {
+    return ["All", ...new Set(cutoffs.map((c) => String(c.year)))];
+  }, [cutoffs]);
+
+  const examOptions = useMemo(() => {
+    return ["All", ...new Set(cutoffs.map((c) => c.exam.examCode))];
+  }, [cutoffs]);
+
+  const phaseOptions = useMemo(() => {
+    return ["All", ...new Set(cutoffs.map((c) => c.phase))];
+  }, [cutoffs]);
 
   /* ── Styles ── */
   const css = `
@@ -746,25 +751,25 @@ const CutoffsPage = () => {
                     label: "Exam",
                     val: exam,
                     set: setExam,
-                    opts: EXAM_OPTIONS,
+                    opts: examOptions,
                   },
                   {
                     label: "Phase",
                     val: phase,
                     set: setPhase,
-                    opts: PHASE_OPTIONS,
+                    opts: phaseOptions,
                   },
                   {
                     label: "Category",
                     val: category,
                     set: setCategory,
-                    opts: CATEGORY_OPTIONS,
+                    opts: categoryOptions,
                   },
                   {
                     label: "Year",
                     val: year,
                     set: setYear,
-                    opts: YEAR_OPTIONS,
+                    opts: yearOptions,
                   },
                 ].map(({ label, val, set, opts }) => (
                   <div className="ct-fg" key={label}>
